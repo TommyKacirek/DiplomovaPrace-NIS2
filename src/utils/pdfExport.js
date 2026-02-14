@@ -1,0 +1,588 @@
+import React from 'react';
+import { pdf, Document, Page, Text, View, StyleSheet, Font, Svg, Path } from '@react-pdf/renderer';
+
+// ==========================================
+// 1. DATA: SLUŽBY 
+// ==========================================
+const SERVICES_DATA_DB = {
+  "Veřejná správa": [ { id: '1.1', label: 'Výkon svěřených pravomocí' } ],
+  "Energetika – Elektřina": [
+    { id: '2.1', label: 'Výroba elektřiny' },
+    { id: '2.2', label: 'Provoz přenosové soustavy elektřiny' },
+    { id: '2.3', label: 'Provoz distribuční soustavy elektřiny' },
+    { id: '2.4', label: 'Obchod s elektřinou' },
+    { id: '2.5', label: 'Činnost nominovaného organizátora trhu' },
+    { id: '2.6', label: 'Agregace elektřiny' },
+    { id: '2.7', label: 'Ukládání elektřiny' },
+    { id: '2.8', label: 'Odezva strany poptávky' },
+    { id: '2.9', label: 'Provoz veřejně přístupné dobíjecí stanice' },
+    { id: '2.10', label: 'Činnost Elektroenergetického datového centra' }
+  ],
+  "Energetika – Ropa a ropné produkty": [
+    { id: '3.1', label: 'Těžba ropy' },
+    { id: '3.2', label: 'Zpracovávání ropy' },
+    { id: '3.3', label: 'Provoz skladovacího zařízení pro skladování ropy' },
+    { id: '3.4', label: 'Provoz ropovodu' },
+    { id: '3.5', label: 'Provoz produktovodu' },
+    { id: '3.6', label: 'Činnost ústředního správce zásob' },
+    { id: '3.7', label: 'Provoz veřejně přístupné čerpací stanice' }
+  ],
+  "Energetika – Zemní plyn": [
+    { id: '4.1', label: 'Výroba zemního plynu' },
+    { id: '4.2', label: 'Provoz přepravní soustavy zemního plynu' },
+    { id: '4.3', label: 'Provoz distribuční soustavy zemního plynu' },
+    { id: '4.4', label: 'Obchod se zemním plynem' },
+    { id: '4.5', label: 'Uskladňování zemního plynu' }
+  ],
+  "Energetika – Teplárenství": [
+    { id: '5.1', label: 'Výroba tepelné energie' },
+    { id: '5.2', label: 'Provoz soustavy zásobování tepelnou energií' }
+  ],
+  "Energetika – Vodík": [
+    { id: '6.1', label: 'Výroba vodíku' },
+    { id: '6.2', label: 'Skladování vodíku' },
+    { id: '6.3', label: 'Přeprava vodíku' }
+  ],
+  "Výrobní průmysl": [
+    { id: '7.1', label: 'Výroba počítačů, elektronických a optických přístrojů' },
+    { id: '7.2', label: 'Výroba elektrických zařízení' },
+    { id: '7.3', label: 'Výroba strojů a zařízení' },
+    { id: '7.4', label: 'Výroba motorových vozidel, přívěsů a návěsů' },
+    { id: '7.5', label: 'Výroba ostatních dopravních prostředků' }
+  ],
+  "Potravinářský průmysl": [
+    { id: '8.1', label: 'Průmyslová výroba potravin' },
+    { id: '8.2', label: 'Průmyslové zpracování potravin' },
+    { id: '8.3', label: 'Velkoobchodní distribuce potravin' }
+  ],
+  "Chemický průmysl": [
+    { id: '9.1', label: 'Výroba chemických látek podléhajících registraci' },
+    { id: '9.2', label: 'Uvádění chemických látek na trh' },
+    { id: '9.3', label: 'Výroba předmětů podléhajících registraci' },
+    { id: '9.4', label: 'Užívání objektu za účelem umístění nebezpečné látky' }
+  ],
+  "Vodní hospodářství": [
+    { id: '10.1', label: 'Provozování vodovodu sloužícího veřejné potřebě' },
+    { id: '10.2', label: 'Provozování kanalizace sloužící veřejné potřebě' }
+  ],
+  "Odpadové hospodářství": [
+    { id: '11.1', label: 'Provoz zařízení určeného pro nakládání s odpady' },
+    { id: '11.2', label: 'Obchodování s odpadem' },
+    { id: '11.3', label: 'Zprostředkování nakládání s odpadem' },
+    { id: '11.4', label: 'Přeprava odpadu' }
+  ],
+  "Letecká doprava": [
+    { id: '12.1', label: 'Provoz obchodní letecké dopravy' },
+    { id: '12.2', label: 'Provoz mezinárodního letiště' },
+    { id: '12.3', label: 'Provoz pomocných zařízení letiště' },
+    { id: '12.4', label: 'Letové navigační služby' }
+  ],
+  "Drážní doprava": [
+    { id: '13.1', label: 'Provozování železniční dopravní cesty' },
+    { id: '13.2', label: 'Provoz celostátní dráhy' },
+    { id: '13.3', label: 'Provoz regionální dráhy' },
+    { id: '13.4', label: 'Provoz veřejně přístupné vlečky' },
+    { id: '13.5', label: 'Provoz drážní dopravy na celostátní dráze' },
+    { id: '13.6', label: 'Provoz drážní dopravy na regionální dráze' },
+    { id: '13.7', label: 'Provoz drážní dopravy na veřejně přístupné vlečce' },
+    { id: '13.8', label: 'Provoz zařízení služeb' }
+  ],
+  "Námořní vodní doprava": [
+    { id: '14.1', label: 'Činnost námořní vodní dopravy' },
+    { id: '14.2', label: 'Provoz řídícího orgánu přístavu' },
+    { id: '14.3', label: 'Provoz vodního díla nebo zařízení v přístavu' },
+    { id: '14.4', label: 'Provoz služby lodní dopravě' }
+  ],
+  "Silniční doprava": [
+    { id: '15.1', label: 'Řízení provozu na pozemních komunikacích' },
+    { id: '15.2', label: 'Provoz inteligentního dopravního systému' }
+  ],
+  "Digitální infrastruktura a služby": [
+    { id: '16.1', label: 'Poskytování veřejně dostupné služby elektronických komunikací' },
+    { id: '16.2', label: 'Zajišťování veřejné komunikační sítě' },
+    { id: '16.3', label: 'Poskytování služby výměnného uzlu internetu (IXP)' },
+    { id: '16.4', label: 'Poskytování služby systému překladu doménových jmen (DNS)' },
+    { id: '16.5', label: 'Poskytování služby registrace a správy doménových jmen' },
+    { id: '16.6', label: 'Správa a provoz registru domény nejvyšší úrovně' },
+    { id: '16.7', label: 'Správa a provoz domény gov.cz' },
+    { id: '16.8', label: 'Poskytování služby cloud computingu' },
+    { id: '16.9', label: 'Poskytování služby datového centra' },
+    { id: '16.10', label: 'Poskytování služby sítě pro doručování obsahu (CDN)' },
+    { id: '16.11', label: 'Správa kvalifikovaného systému elektronické identifikace' },
+    { id: '16.12', label: 'Poskytování služby vytvářející důvěru' },
+    { id: '16.13', label: 'Poskytování řízené služby (MSP)' },
+    { id: '16.14', label: 'Poskytování řízené bezpečnostní služby (MSSP)' },
+    { id: '16.15', label: 'Poskytování služby on-line tržiště' },
+    { id: '16.16', label: 'Poskytování služby internetového vyhledávače' },
+    { id: '16.17', label: 'Poskytování platformy sociální sítě' },
+    { id: '16.18', label: 'Provozování Národního CERT' }
+  ],
+  "Finanční trh": [
+    { id: '17.1', label: 'Činnost úvěrové instituce' },
+    { id: '17.2', label: 'Provoz obchodního systému' },
+    { id: '17.3', label: 'Činnost ústřední protistrany' },
+    { id: '17.4', label: 'Činnost platební instituce' },
+    { id: '17.5', label: 'Činnost instituce elektronických peněz' }
+  ],
+  "Zdravotnictví": [
+    { id: '18.1', label: 'Poskytování zdravotní péče' },
+    { id: '18.2', label: 'Poskytování zdravotnické záchranné služby' },
+    { id: '18.3', label: 'Činnost referenční laboratoře EU' },
+    { id: '18.4', label: 'Výzkum a vývoj humánních léčivých přípravků' },
+    { id: '18.5', label: 'Výroba humánních léčivých přípravků' },
+    { id: '18.6', label: 'Výroba léčivých látek' },
+    { id: '18.7', label: 'Výroba zdravotnických prostředků' },
+    { id: '18.8', label: 'Výroba diagnostických zdravotnických prostředků in vitro' },
+    { id: '18.9', label: 'Výroba kriticky důležitých zdravotnických prostředků' }
+  ],
+  "Věda, výzkum a vzdělávání": [
+    { id: '19.1', label: 'Výzkum a vývoj' }
+  ],
+  "Poštovní a kurýrní služby": [
+    { id: '20.1', label: 'Poštovní služba' },
+    { id: '20.2', label: 'Kurýrní služba' }
+  ],
+  "Obranný průmysl": [
+    { id: '21.1', label: 'Výroba vojenského materiálu' },
+    { id: '21.2', label: 'Obchod s vojenským materiálem' }
+  ],
+  "Vesmírný průmysl": [
+    { id: '22.1', label: 'Zajištění podpory poskytování služeb využívajících kosmického prostoru' }
+  ]
+};
+
+// ==========================================
+// 2. DATA: OPATŘENÍ (Režim 410/2025: §3 - §14)
+// ==========================================
+const MEASURES_LOWER_410 = [
+  { title: '§ 3 Systém a evidence opatření', article: '§ 3' },
+  { title: '§ 4 Požadavky na vedení', article: '§ 4' },
+  { title: '§ 5 Bezpečnost lidských zdrojů', article: '§ 5' },
+  { title: '§ 6 Řízení kontinuity činností', article: '§ 6' },
+  { title: '§ 7 Řízení přístupu', article: '§ 7' },
+  { title: '§ 8 Řízení identit a oprávnění', article: '§ 8' },
+  { title: '§ 9 Detekce a logování', article: '§ 9' },
+  { title: '§ 10 Řešení incidentů', article: '§ 10' },
+  { title: '§ 11 Bezpečnost sítí', article: '§ 11' },
+  { title: '§ 12 Aplikační bezpečnost', article: '§ 12' },
+  { title: '§ 13 Kryptografické algoritmy', article: '§ 13' },
+  { title: '§ 14 Významnost dopadu', article: '§ 14' }
+];
+
+const MEASURES_HIGHER_409 = [
+  { title: 'Systém řízení bezpečnosti (ISMS)', article: '§ 3-4' },
+  { title: 'Bezpečnostní audity a kontroly', article: '§ 6' },
+  { title: 'Bezpečnost dodavatelského řetězce', article: '§ 8' },
+  { title: 'Bezpečnost lidských zdrojů', article: '§ 9' },
+  { title: 'Vícefaktorová autentizace (MFA)', article: '§ 11' },
+  { title: 'Kryptografická ochrana', article: '§ 12' },
+  { title: 'Fyzická a environmentální bezpečnost', article: '§ 13' },
+  { title: 'Bezpečný vývoj a údržba', article: '§ 16' },
+  { title: 'Komplexní zvládání incidentů', article: '§ 20-22' },
+  { title: 'Krizové řízení a obnova', article: '§ 23-25' }
+];
+
+// ==========================================
+// 3. IMPLEMENTAČNÍ PLÁN (OSS STACK - Detailní texty)
+// ==========================================
+const IMPLEMENTATION_PLAN = [
+  {
+    section: "§ 3 Systém a § 4 Vedení",
+    description: "Governance, evidence aktiv a odpovědnost vedení.",
+    solution: "CISO Assistant jako centrální platforma pro řízení ISMS, evidenci opatření a hodnocení dodavatelů. Snipe-IT pro technickou evidenci aktiv. Tato kombinace zajišťuje podklady pro rozhodování vedení.",
+    stack: ["CISO Assistant", "Snipe-IT"]
+  },
+  {
+    section: "§ 5 Bezpečnost lidských zdrojů",
+    description: "Politiky, školení a řízení lidského faktoru.",
+    solution: "CISO Assistant pro řízení politik a evidenci školení. Snipe-IT pro adresné přiřazení aktiv. Volitelně Moodle pro e-learning a Gophish pro simulace phishingu.",
+    stack: ["CISO Assistant", "Snipe-IT", "Moodle", "Gophish"]
+  },
+  {
+    section: "§ 6 Řízení kontinuity činností",
+    description: "Prioritizace obnovy, BIA a zálohování.",
+    solution: "CISO Assistant pro BIA a plány obnovy. Snipe-IT pro určení kritičnosti aktiv. Restic pro šifrované, deduplikované zálohování (lokální i off-site).",
+    stack: ["CISO Assistant", "Snipe-IT", "Restic"]
+  },
+  {
+    section: "§ 7 Přístupy a § 8 Identity",
+    description: "Řízení identit, MFA a správa hesel.",
+    solution: "Keycloak jako centrální IdP pro MFA a SSO. Vaultwarden pro správu privilegovaných hesel (break-glass účty). CISO Assistant pro procesní řízení auditů přístupů.",
+    stack: ["Keycloak", "Vaultwarden", "CISO Assistant"]
+  },
+  {
+    section: "§ 9 Detekce a § 10 Incidenty",
+    description: "Logování, IDS/IPS a řešení incidentů.",
+    solution: "Suricata (IDS/IPS) na perimetru. Wazuh (XDR/SIEM) pro koncové stanice a centrální log management. CISO Assistant pro metodiku a hlášení incidentů. Matrix/Element pro bezpečnou komunikaci.",
+    stack: ["Suricata", "Wazuh", "CISO Assistant", "Matrix/Element"]
+  },
+  {
+    section: "§ 11 Bezpečnost sítí",
+    description: "Segmentace, firewall a VPN.",
+    solution: "OPNsense jako firewall a VPN koncentrátor (WireGuard/IPsec). Zajištění segmentace sítě (VLAN) a principu 'Deny by Default'.",
+    stack: ["OPNsense"]
+  },
+  {
+    section: "§ 12 Aplikační bezpečnost",
+    description: "Patch management a řízení zranitelností.",
+    solution: "OpenVAS (Greenbone) pro pravidelné skenování zranitelností. Snipe-IT pro sledování EOL systémů. CISO Assistant pro řízení nápravných opatření.",
+    stack: ["OpenVAS", "Snipe-IT", "CISO Assistant"]
+  },
+  {
+    section: "§ 13 Kryptografické prostředky",
+    description: "PKI, šifrování a bezpečná komunikace.",
+    solution: "EJBCA Community pro správu certifikátů a klíčů (PKI). Matrix/Element pro E2EE šifrovanou komunikaci. CISO Assistant pro kryptopolitiku.",
+    stack: ["EJBCA", "Matrix/Element", "CISO Assistant"]
+  },
+  {
+    section: "§ 14 Významnost dopadu",
+    description: "Metodika hodnocení dopadů.",
+    solution: "Implementace metodiky v CISO Assistant pro stanovení únosné míry újmy a klasifikaci incidentů pro účely hlášení regulátorovi.",
+    stack: ["CISO Assistant"]
+  }
+];
+
+// ==========================================
+// 4. DESIGN SYSTEM 
+// ==========================================
+Font.register({
+  family: 'Roboto',
+  fonts: [
+    { src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf', fontWeight: 400 },
+    { src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-medium-webfont.ttf', fontWeight: 500 },
+    { src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-bold-webfont.ttf', fontWeight: 700 },
+    { src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-italic-webfont.ttf', fontStyle: 'italic' },
+  ],
+});
+
+const colors = {
+  brand: '#3B82F6',      // Modern Blue
+  brandDark: '#1E3A8A',  // Deep Blue
+  success: '#10B981',    // Emerald
+  warning: '#F59E0B',    // Amber
+  danger: '#EF4444',     // Red
+  textMain: '#1E293B',   // Slate 800
+  textSec: '#64748B',    // Slate 500
+  bgPage: '#F1F5F9',     // Slate 100 (Light gray bg)
+  white: '#FFFFFF',
+  border: '#E2E8F0'
+};
+
+const styles = StyleSheet.create({
+  page: { fontFamily: 'Roboto', backgroundColor: colors.bgPage, paddingBottom: 60 },
+  
+  // -- Header Area  --
+  headerStrip: { height: 8, backgroundColor: colors.brand },
+  header: { padding: 40, paddingBottom: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.white },
+  logoText: { fontSize: 22, fontWeight: 700, color: colors.textMain },
+  logoSub: { fontSize: 10, color: colors.textSec, textTransform: 'uppercase', letterSpacing: 1 },
+  dateBlock: { alignItems: 'flex-end' },
+  dateLabel: { fontSize: 8, color: colors.textSec },
+  dateValue: { fontSize: 10, fontWeight: 500, color: colors.textMain },
+
+  // -- Main Card --
+  card: { marginHorizontal: 40, marginTop: 20, padding: 25, backgroundColor: colors.white, borderRadius: 8, border: `1px solid ${colors.border}` },
+  
+  // Result Badge
+  statusRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
+  badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, alignItems: 'center' },
+  badgeText: { fontSize: 11, fontWeight: 700, color: colors.white, textTransform: 'uppercase' },
+  
+  // Score Circle
+  scoreBlock: { alignItems: 'flex-end' },
+  scoreBig: { fontSize: 32, fontWeight: 700, color: colors.brand },
+  scoreLabel: { fontSize: 9, color: colors.textSec, textTransform: 'uppercase' },
+
+  // Info Grid
+  grid: { flexDirection: 'row', borderTop: `1px solid ${colors.border}`, paddingTop: 15, marginTop: 5 },
+  col: { flex: 1 },
+  label: { fontSize: 8, color: colors.textSec, textTransform: 'uppercase', marginBottom: 4 },
+  value: { fontSize: 11, fontWeight: 500, color: colors.textMain },
+
+  // Reasoning
+  reasonBox: { marginTop: 20, padding: 12, backgroundColor: '#EFF6FF', borderRadius: 6, borderLeft: `3px solid ${colors.brand}` },
+  reasonText: { fontSize: 10, color: '#1E40AF', lineHeight: 1.4 },
+
+  // -- Content Sections --
+  sectionTitle: { fontSize: 13, fontWeight: 700, color: colors.textMain, marginTop: 30, marginBottom: 10, marginLeft: 40, textTransform: 'uppercase', letterSpacing: 0.5 },
+  
+  // Tables (Gap Analysis)
+  tableContainer: { marginHorizontal: 40, backgroundColor: colors.white, borderRadius: 8, overflow: 'hidden', border: `1px solid ${colors.border}` },
+  tableHeader: { flexDirection: 'row', backgroundColor: '#F8FAFC', paddingVertical: 10, paddingHorizontal: 15, borderBottom: `1px solid ${colors.border}` },
+  tableRow: { flexDirection: 'row', paddingVertical: 10, paddingHorizontal: 15, borderBottom: `1px solid ${colors.border}`, alignItems: 'center' },
+  th: { fontSize: 9, fontWeight: 700, color: colors.textSec, textTransform: 'uppercase' },
+  tdTitle: { fontSize: 10, color: colors.textMain, fontWeight: 500 },
+  tdArt: { fontSize: 9, color: colors.textSec },
+  
+  // Implementation Plan (OSS Stack) - přizpůsobeno designu
+  implCard: { marginHorizontal: 40, marginBottom: 12, padding: 15, backgroundColor: colors.white, borderRadius: 8, border: `1px solid ${colors.border}` },
+  implTitle: { fontSize: 10, fontWeight: 700, color: colors.brandDark, marginBottom: 4 },
+  implDesc: { fontSize: 9, color: colors.textSec, marginBottom: 6, fontStyle: 'italic' },
+  implSol: { fontSize: 9, color: colors.textMain, lineHeight: 1.4, marginBottom: 8 },
+  stackRow: { flexDirection: 'row', flexWrap: 'wrap' },
+  stackBadge: { backgroundColor: '#EFF6FF', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 4, marginRight: 6, border: '1px solid #DBEAFE' },
+  stackText: { fontSize: 8, color: '#1D4ED8', fontWeight: 500 },
+
+  // Footer
+  footer: { position: 'absolute', bottom: 20, left: 0, right: 0, textAlign: 'center' },
+  footerText: { fontSize: 8, color: '#94A3B8' }
+});
+
+// ==========================================
+// 5. IKONY 
+// ==========================================
+
+const IconCheck = () => (
+  <Svg width="12" height="12" viewBox="0 0 24 24">
+    <Path d="M20 6L9 17l-5-5" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+  </Svg>
+);
+
+const IconCross = () => (
+  <Svg width="12" height="12" viewBox="0 0 24 24">
+    <Path d="M18 6L6 18M6 6l12 12" stroke="#EF4444" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+  </Svg>
+);
+
+
+const IconShield = () => (
+  <Svg width="40" height="40" viewBox="0 0 24 24">
+    <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="#3B82F6" opacity={0.1} />
+    <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+  </Svg>
+);
+
+const ProgressBar = ({ percent }) => (
+  <View style={{ marginTop: 20 }}>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 }}>
+      <Text style={{ fontSize: 9, fontWeight: 700, color: colors.textSec }}>STAV IMPLEMENTACE</Text>
+      <Text style={{ fontSize: 9, fontWeight: 700, color: colors.brand }}>{percent}%</Text>
+    </View>
+    <View style={{ height: 6, backgroundColor: '#E2E8F0', borderRadius: 3 }}>
+      <View style={{ width: `${percent}%`, height: '100%', backgroundColor: percent === 100 ? colors.success : colors.brand, borderRadius: 3 }} />
+    </View>
+  </View>
+);
+
+// ==========================================
+// 6. HLAVNÍ DOKUMENT
+// ==========================================
+
+const ReportDocument = ({ data }) => {
+  const { companySize, sector, selectedServices, specialCriteria, complianceLevel, complianceReasoning, securityStatus } = data;
+  const today = new Date().toLocaleDateString('cs-CZ');
+
+  // A. Logika
+  const isHigher = complianceLevel === 'higher';
+  const isLower = complianceLevel === 'lower';
+  const isNone = complianceLevel === 'none';
+
+  // B. Výběr sady otázek
+  const activeMeasuresDB = isHigher ? MEASURES_HIGHER_409 : MEASURES_LOWER_410;
+
+  // C. Gap Analýza
+  const implementedTitles = securityStatus ? Object.keys(securityStatus) : [];
+  const implementedList = [];
+  const missingList = [];
+
+  if (!isNone) {
+    activeMeasuresDB.forEach(m => {
+      if (implementedTitles.includes(m.title)) {
+        implementedList.push(m);
+      } else {
+        missingList.push(m);
+      }
+    });
+  }
+
+  const percent = activeMeasuresDB.length > 0 
+    ? Math.round((implementedList.length / activeMeasuresDB.length) * 100) 
+    : 0;
+
+  // D. Služby
+  const sectorServices = SERVICES_DATA_DB[sector] || [];
+  const selectedServicesDetails = sectorServices.filter(s => selectedServices.includes(s.id));
+
+  // E. Barvy badge
+  let badgeBg = colors.success;
+  let badgeLabel = "MIMO REGULACI";
+  if (isHigher) { badgeBg = colors.danger; badgeLabel = "REŽIM VYŠŠÍCH POVINNOSTÍ"; }
+  else if (isLower) { badgeBg = colors.warning; badgeLabel = "REŽIM NIŽŠÍCH POVINNOSTÍ"; }
+
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        
+        {/* Header Strip */}
+        <View style={styles.headerStrip} />
+        
+        {/* Top Bar  */}
+        <View style={styles.header}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <IconShield /> 
+            <View style={{ marginLeft: 12 }}>
+              <Text style={styles.logoSub}>AUDIT KYBERNETICKÉ BEZPEČNOSTI</Text>
+              <Text style={styles.logoText}>NIS2 Compliance Report</Text>
+            </View>
+          </View>
+          <View style={styles.dateBlock}>
+            <Text style={styles.dateLabel}>DATUM VYHODNOCENÍ</Text>
+            <Text style={styles.dateValue}>{today}</Text>
+          </View>
+        </View>
+
+        {/* Dashboard Card */}
+        <View style={styles.card}>
+          <View style={styles.statusRow}>
+            <View style={{...styles.badge, backgroundColor: badgeBg}}>
+              <Text style={styles.badgeText}>{badgeLabel}</Text>
+            </View>
+            {!isNone && (
+              <View style={styles.scoreBlock}>
+                <Text style={styles.scoreBig}>{percent}%</Text>
+                <Text style={styles.scoreLabel}>Celková shoda</Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.grid}>
+             <View style={styles.col}>
+               <Text style={styles.label}>Velikost podniku</Text>
+               <Text style={styles.value}>{companySize || "Nezadáno"}</Text>
+             </View>
+             <View style={styles.col}>
+               <Text style={styles.label}>Sektor</Text>
+               <Text style={styles.value}>{sector || "Nezadáno"}</Text>
+             </View>
+             <View style={styles.col}>
+               <Text style={styles.label}>Počet zaměstnanců</Text>
+               <Text style={styles.value}>{data.employeesCount || "-"}</Text>
+             </View>
+          </View>
+
+          <View style={styles.reasonBox}>
+            <Text style={styles.reasonText}>
+              <Text style={{fontWeight: 700}}>Důvod klasifikace: </Text>
+              {complianceReasoning}
+            </Text>
+          </View>
+
+          {!isNone && <ProgressBar percent={percent} />}
+        </View>
+
+        {/* 1. IMPLEMENTOVÁNO */}
+        {!isNone && implementedList.length > 0 && (
+          <View wrap={false}>
+            <Text style={{...styles.sectionTitle, color: colors.success}}>
+              ✅ Již implementováno
+            </Text>
+            <View style={styles.tableContainer}>
+              <View style={styles.tableHeader}>
+                <Text style={{...styles.th, flex: 4}}>Opatření</Text>
+                <Text style={{...styles.th, flex: 1}}>Legislativa</Text>
+                <Text style={{...styles.th, flex: 1, textAlign: 'right'}}>Stav</Text>
+              </View>
+              {implementedList.map((m, i) => (
+                <View key={i} style={styles.tableRow}>
+                  <View style={{ flex: 4 }}>
+                    <Text style={styles.tdTitle}>{m.title}</Text>
+                  </View>
+                  <Text style={{...styles.tdArt, flex: 1}}>{m.article}</Text>
+                  <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                    <IconCheck />
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* 2. K DOŘEŠENÍ */}
+        {!isNone && missingList.length > 0 && (
+          <View wrap={false}>
+            <Text style={{...styles.sectionTitle, color: colors.danger}}>
+               K dořešení (Gap Analýza)
+            </Text>
+            <View style={styles.tableContainer}>
+              <View style={styles.tableHeader}>
+                <Text style={{...styles.th, flex: 4}}>Chybějící opatření</Text>
+                <Text style={{...styles.th, flex: 1}}>Legislativa</Text>
+                <Text style={{...styles.th, flex: 1, textAlign: 'right'}}>Stav</Text>
+              </View>
+              {missingList.map((m, i) => (
+                <View key={i} style={styles.tableRow}>
+                  <View style={{ flex: 4 }}>
+                    <Text style={styles.tdTitle}>{m.title}</Text>
+                    <Text style={{ fontSize: 8, color: '#94A3B8' }}>Nutné doplnit dokumentaci</Text>
+                  </View>
+                  <Text style={{...styles.tdArt, flex: 1}}>{m.article}</Text>
+                  <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                    <IconCross />
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* 3. OSS STACK  */}
+        {isLower && (
+          <View break>
+            {/*  Header Strip pro novou stránku */}
+            <View style={styles.headerStrip} />
+            <Text style={styles.sectionTitle}>Návrh technického řešení (OSS Stack)</Text>
+            
+            <Text style={{ fontSize: 10, color: colors.textMain, marginHorizontal: 40, marginBottom: 15, lineHeight: 1.5 }}>
+              Následující architektura využívá ověřené Open Source nástroje pro splnění požadavků vyhlášky č. 410/2025 Sb. bez licenčních poplatků.
+            </Text>
+
+            {IMPLEMENTATION_PLAN.map((plan, i) => (
+              <View key={i} style={styles.implCard} wrap={false}>
+                <Text style={styles.implTitle}>{plan.section}</Text>
+                <Text style={styles.implDesc}>{plan.description}</Text>
+                
+                <Text style={{ fontSize: 9, fontWeight: 700, marginTop: 4, marginBottom: 2, color: colors.textMain }}>
+                  Řešení:
+                </Text>
+                <Text style={styles.implSol}>{plan.solution}</Text>
+                
+                <View style={styles.stackRow}>
+                  {plan.stack.map((tech, t) => (
+                    <View key={t} style={styles.stackBadge}>
+                      <Text style={styles.stackText}>{tech}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            Vygenerováno nástrojem NIS2 Checker | © 2025 | Strana 1
+          </Text>
+        </View>
+      </Page>
+    </Document>
+  );
+};
+
+// --- 7. EXPORT ---
+export const generatePDFReport = async (data) => {
+  try {
+    const blob = await pdf(<ReportDocument data={data} />).toBlob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `NIS2_Audit_${data.companySize || 'Report'}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error("Chyba PDF:", error);
+    alert("Chyba při generování PDF.");
+  }
+};
+
+export default ReportDocument;

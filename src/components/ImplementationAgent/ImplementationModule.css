@@ -1,0 +1,361 @@
+/* ImplementationModule.css - Cyber Enterprise Dark Theme (Strict) */
+
+/* --- Variables & Core Palette --- */
+:root {
+    /* Backgrounds */
+    --im-bg-app: #0B1120;
+    /* Deep Dark Slate Blue (Requested) */
+    --im-bg-panel: rgba(30, 41, 59, 0.7);
+    /* Requested Glass Rule */
+    --im-bg-panel-hover: rgba(51, 65, 85, 0.8);
+    --im-bg-input: rgba(15, 23, 42, 0.6);
+
+    /* Text Colors */
+    --im-text-primary: #F8FAFC;
+    /* Almost White */
+    --im-text-secondary: #94A3B8;
+    /* Cool Gray */
+    --im-text-tertiary: #64748b;
+
+    /* Accents */
+    --im-primary: #06B6D4;
+    /* Neon Cyan */
+    --im-primary-hover: #22D3EE;
+
+    --im-success: #10b981;
+    --im-danger: #ef4444;
+    --im-warning: #f59e0b;
+
+    /* Borders & Effects */
+    --im-border: rgba(255, 255, 255, 0.08);
+    /* Requested Border */
+    --im-radius: 16px;
+    /* Requested Radius */
+    --im-backdrop-blur: blur(12px);
+    /* Requested Blur */
+
+    /* Shadows & Glows */
+    --im-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    --im-glow-interactive: 0 0 15px rgba(6, 182, 212, 0.3), 0 0 4px rgba(6, 182, 212, 0.8);
+    --im-border-glow: #06B6D4;
+}
+
+/* Global Reset */
+.module-wrapper {
+    background-color: var(--im-bg-app);
+    color: var(--im-text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    overflow: hidden;
+}
+
+/* --- Layout: Sidebar + Content --- */
+
+.sidebar {
+    width: 260px;
+    background: rgba(11, 17, 32, 0.95);
+    /* Matches App BG but opaque */
+    border-right: 1px solid var(--im-border);
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    flex-shrink: 0;
+    z-index: 20;
+}
+
+.main-content {
+    flex: 1;
+    padding: 3rem 4rem;
+    overflow-y: auto;
+    position: relative;
+    /* Subtle ambient light */
+    background:
+        radial-gradient(circle at 0% 0%, rgba(6, 182, 212, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 100% 100%, rgba(34, 211, 238, 0.05) 0%, transparent 40%);
+}
+
+/* --- Sidebar Navigation --- */
+.sidebar-brand {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--im-text-primary);
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.brand-icon {
+    color: var(--im-primary);
+    filter: drop-shadow(0 0 5px var(--im-primary));
+}
+
+.stepper-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    color: var(--im-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.step-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--im-text-primary);
+}
+
+.step-item.active {
+    background: rgba(6, 182, 212, 0.1);
+    color: var(--im-primary);
+    border-color: rgba(6, 182, 212, 0.3);
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.1);
+}
+
+.step-number {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    margin-right: 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.step-item.active .step-number {
+    background: var(--im-primary);
+    color: #000;
+    box-shadow: 0 0 8px var(--im-primary);
+}
+
+.step-item.completed .step-number {
+    background: var(--im-success);
+    color: #fff;
+}
+
+/* --- Glassmorphism Panels (Strict Rule applied) --- */
+
+.glass-panel,
+.step-container,
+.risk-matrix-card,
+.summary-stats-card,
+.card-checkbox {
+    background: var(--im-bg-panel);
+    backdrop-filter: var(--im-backdrop-blur);
+    -webkit-backdrop-filter: var(--im-backdrop-blur);
+    border: 1px solid var(--im-border);
+    border-radius: var(--im-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--im-shadow-card);
+}
+
+/* Hover Glow for Interactive Cards */
+.card-checkbox:hover,
+.action-card:hover {
+    box-shadow: var(--im-glow-interactive);
+    border-color: var(--im-border-glow);
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+/* --- Typography --- */
+h1,
+h2,
+h3,
+h4 {
+    color: var(--im-text-primary);
+    margin-top: 0;
+}
+
+p,
+label,
+li {
+    color: var(--im-text-secondary);
+}
+
+.step-header {
+    border-bottom: 1px solid var(--im-border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.step-badge {
+    color: var(--im-primary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+/* --- Inputs forms --- */
+.input-sleek,
+select.input-sleek,
+textarea.input-sleek {
+    width: 100%;
+    background: var(--im-bg-input);
+    border: 1px solid var(--im-border);
+    color: var(--im-text-primary);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+.input-sleek:focus {
+    outline: none;
+    border-color: var(--im-border-glow);
+    box-shadow: var(--im-glow-interactive);
+    background: rgba(15, 23, 42, 0.9);
+}
+
+/* --- Buttons --- */
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--im-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--im-text-primary);
+}
+
+.action-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--im-primary);
+}
+
+.action-button.primary {
+    background: var(--im-primary);
+    color: #0B1120;
+    /* Dark text on bright button */
+    border: none;
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+}
+
+.action-button.primary:hover {
+    background: var(--im-primary-hover);
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
+}
+
+.action-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* --- Table Styles --- */
+.asset-table,
+.measures-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.asset-table th,
+.measures-table th {
+    text-align: left;
+    padding: 1rem;
+    color: var(--im-text-secondary);
+    border-bottom: 1px solid var(--im-border);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.asset-table td,
+.measures-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--im-border);
+    color: var(--im-text-primary);
+}
+
+/* --- Landing Page Hero (Internal Step 0) --- */
+.internal-landing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+    text-align: center;
+}
+
+.landing-cards-row {
+    display: flex;
+    gap: 2rem;
+    margin-top: 3rem;
+    width: 100%;
+    max-width: 800px;
+}
+
+.action-card {
+    flex: 1;
+    background: var(--im-bg-panel);
+    border: 1px solid var(--im-border);
+    border-radius: var(--im-radius);
+    padding: 3rem 2rem;
+    backdrop-filter: var(--im-backdrop-blur);
+    -webkit-backdrop-filter: var(--im-backdrop-blur);
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.action-card .icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.2));
+}
+
+.action-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--im-text-primary);
+}
+
+.action-card p {
+    font-size: 1rem;
+    color: var(--im-text-secondary);
+    line-height: 1.5;
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
