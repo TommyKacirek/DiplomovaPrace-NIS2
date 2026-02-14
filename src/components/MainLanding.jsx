@@ -7,7 +7,8 @@ export default function MainLanding({ onSelectMode }) {
 
       {/* Header / Hero */}
       <header style={{ textAlign: 'center', marginBottom: '80px', marginTop: '60px' }}>
-        <div style={{ fontSize: 'clamp(3rem, 5vw, 4rem)', marginBottom: '16px' }}></div>
+        {/* Replaced Apple Logo with NIS2 Shield/Icon */}
+        <div style={{ fontSize: 'clamp(3rem, 5vw, 4rem)', marginBottom: '16px' }}>🛡️</div>
         <h1 style={{ lineHeight: 1.1 }}>
           NIS2 <span className="text-gradient-apple">Portal</span>
         </h1>
@@ -77,7 +78,8 @@ export default function MainLanding({ onSelectMode }) {
 
         .bento-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+          /* UPDATED: Wider columns per request (350px) */
+          grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
           gap: 24px;
           margin-bottom: 40px;
         }
@@ -133,6 +135,7 @@ export default function MainLanding({ onSelectMode }) {
             gap: 16px;
         }
 
+        /* Using global vars for badges too if possible or hardcoded to match theme */
         .card-badge.purple { background: rgba(191, 90, 242, 0.15); color: #bf5af2; }
         .card-badge.orange { background: rgba(255, 149, 0, 0.15); color: #ff9500; }
         .card-badge.gray   { background: rgba(142, 142, 147, 0.15); color: #8e8e93; }

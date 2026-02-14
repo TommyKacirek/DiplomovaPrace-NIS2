@@ -1,51 +1,42 @@
-/* ImplementationModule.css - Apple Dark Mode Integration */
-
-/* 
-   We map the internal --im variables to the global Apple variables from App.css 
-   to ensure strict consistency while maintaining local component structure.
-*/
+/* ImplementationModule.css - Strict NIS2 Portal Theme Integration */
 
 :root {
-    /* Backgrounds */
-    --im-bg-app: var(--bg-black);
-    --im-bg-panel: var(--bg-card);
-    --im-bg-panel-hover: var(--bg-card-hover);
-    --im-bg-input: var(--bg-input);
+    /* Strict Color Mapping (Black & Purple) */
+    --im-bg-app: #000000;
+    --im-bg-panel: #1c1c1e;
+    --im-bg-panel-hover: #2c2c2e;
+    --im-bg-input: #2c2c2e;
 
-    /* Text Colors */
-    --im-text-primary: var(--text-main);
-    --im-text-secondary: var(--text-dim);
-    --im-text-tertiary: var(--text-tertiary);
+    /* Text */
+    --im-text-primary: #ffffff;
+    --im-text-secondary: rgba(235, 235, 245, 0.6);
+    --im-text-tertiary: rgba(235, 235, 245, 0.3);
 
     /* Accents */
-    --im-primary: var(--accent-purple);
+    --im-primary: #bf5af2;
     --im-primary-hover: #d27af7;
-    /* Lighter Purple */
-    --im-success: var(--accent-green);
-    --im-danger: var(--accent-red);
+    --im-success: #32d74b;
+    --im-danger: #ff453a;
     --im-warning: #ff9f0a;
 
-    /* Borders & Effects */
-    --im-border: var(--border-subtle);
-    --im-radius: var(--radius-card);
+    /* Borders */
+    --im-border: rgba(255, 255, 255, 0.1);
+    --im-radius: 20px;
     --im-backdrop-blur: none;
-    /* Apple Dark Mode uses solid dark grays, not heavy glass here */
 
-    /* Shadows */
+    /* Simple Shadows */
     --im-shadow-card: 0 4px 12px rgba(0, 0, 0, 0.2);
-    --im-glow-interactive: 0 0 0 2px var(--accent-purple);
+    --im-glow-interactive: 0 0 0 2px #bf5af2;
 }
 
 /* Global Reset for Module */
 .module-wrapper {
     background-color: var(--im-bg-app);
     color: var(--im-text-primary);
-    font-family: var(--font-stack);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
     height: 100%;
     min-height: 100vh;
     display: flex;
-    overflow: hidden;
-    /* Sidebar logic manages scroll */
 }
 
 /* --- Layout: Sidebar + Content --- */
@@ -53,7 +44,6 @@
 .sidebar {
     width: 280px;
     background-color: #121214;
-    /* Slightly lighter than pure black for sidebar distinction */
     border-right: 1px solid var(--im-border);
     display: flex;
     flex-direction: column;
@@ -65,7 +55,6 @@
 .main-content {
     flex: 1;
     padding: 40px 60px;
-    overflow-y: auto;
     position: relative;
     background-color: var(--im-bg-app);
 }
@@ -84,6 +73,98 @@
 
 .brand-icon {
     font-size: 1.2rem;
+}
+
+/* --- Landing Page Hero (Internal Step 0) --- */
+.internal-landing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    text-align: center;
+    width: 100%;
+}
+
+.landing-cards-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    /* Responsive Grid */
+    gap: 32px;
+    margin-top: 48px;
+    width: 100%;
+    max-width: 800px;
+    margin-left: auto;
+    /* Center the grid */
+    margin-right: auto;
+}
+
+.action-card {
+    background: var(--im-bg-panel);
+    border: 1px solid var(--im-border);
+    border-radius: 24px;
+    /* Larger radius for Apple feel */
+    padding: 40px 32px;
+    /* Increased padding */
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    position: relative;
+    height: 100%;
+    min-height: 220px;
+    /* Force height so it's not a flat bar */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.action-card:hover {
+    background: var(--im-bg-panel-hover);
+    transform: translateY(-4px);
+    border-color: var(--im-primary);
+    box-shadow: 0 12px 30px rgba(191, 90, 242, 0.15);
+    /* Purple glow on hover */
+}
+
+.action-card .icon {
+    margin-bottom: 24px;
+    background: rgba(255, 255, 255, 0.08);
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--im-primary);
+    /* Icon color */
+    transition: all 0.3s ease;
+}
+
+.action-card:hover .icon {
+    background: var(--im-primary);
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.action-card .icon svg {
+    width: 28px;
+    /* Force SVG size */
+    height: 28px;
+}
+
+.action-card h3 {
+    font-size: 1.4rem;
+    margin-bottom: 12px;
+    font-weight: 700;
+    color: var(--im-text-primary);
+}
+
+.action-card p {
+    font-size: 0.95rem;
+    color: var(--im-text-secondary);
+    line-height: 1.5;
+    margin: 0;
 }
 
 .stepper-nav {
@@ -106,39 +187,40 @@
 }
 
 .step-item:hover {
-    background: var(--bg-card-hover);
+    background: var(--im-bg-panel-hover);
     color: var(--im-text-primary);
 }
 
 .step-item.active {
-    background: var(--bg-card-hover);
+    background: var(--im-bg-panel-hover);
     color: var(--im-text-primary);
     font-weight: 600;
 }
 
-.step-number {
-    width: 24px;
-    height: 24px;
-    border-radius: 6px;
-    /* Squircle */
+/* New: Step Icons (Replacing numbers) */
+.step-icon-wrap {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(255, 255, 255, 0.1);
     margin-right: 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
     color: var(--im-text-secondary);
+    transition: all 0.2s;
 }
 
-.step-item.active .step-number {
+.step-item.active .step-icon-wrap {
     background: var(--im-primary);
     color: #fff;
+    box-shadow: 0 0 10px rgba(191, 90, 242, 0.4);
 }
 
-.step-item.completed .step-number {
+.step-item.completed .step-icon-wrap {
     background: var(--im-success);
     color: #000;
+    box-shadow: none;
 }
 
 /* --- Panels & Cards --- */
@@ -147,24 +229,77 @@
 .step-container,
 .risk-matrix-card,
 .summary-stats-card,
-.card-checkbox {
+.card-checkbox,
+.smart-logic-card {
     background: var(--im-bg-panel);
     border: 1px solid var(--im-border);
     border-radius: var(--im-radius);
     padding: 32px;
     margin-bottom: 24px;
     box-shadow: var(--im-shadow-card);
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* Interactive Hover States */
-.card-checkbox:hover,
-.action-card:hover {
+/* Success State for Cards */
+.card-checkbox.checked {
+    background: rgba(50, 215, 75, 0.1);
+    /* Very subtle green tint */
+    border-color: var(--im-success);
+    box-shadow: 0 0 20px rgba(50, 215, 75, 0.15);
+    /* Green Glow */
+}
+
+.card-checkbox:hover {
     background: var(--im-bg-panel-hover);
     transform: scale(1.01);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    border-color: rgba(191, 90, 242, 0.3);
-    /* Slight purple hint */
 }
+
+.card-checkbox.checked:hover {
+    background: rgba(50, 215, 75, 0.15);
+    /* Slightly stronger tint on hover */
+}
+
+
+.card-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: transparent;
+    margin-right: 16px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    transition: all 0.3s;
+}
+
+.card-checkbox.checked .card-indicator {
+    background: var(--im-success);
+    color: #000;
+    transform: scale(1.1);
+}
+
+.card-content h3 {
+    margin: 0 0 8px 0 !important;
+    /* Force override */
+    font-size: 1.1rem;
+}
+
+.card-content p {
+    margin: 0;
+    font-size: 0.95rem;
+    opacity: 0.8;
+}
+
+/* Flex layout for card checkbox */
+.card-checkbox {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+}
+
 
 /* --- Typography --- */
 h1,
@@ -183,7 +318,7 @@ li {
 }
 
 .step-header {
-    margin-bottom: 32px;
+    margin-bottom: 40px;
 }
 
 .step-badge {
@@ -194,6 +329,11 @@ li {
     font-weight: 700;
     display: block;
     margin-bottom: 8px;
+}
+
+.section-desc {
+    margin-bottom: 24px;
+    display: block;
 }
 
 /* --- Inputs forms --- */
@@ -249,6 +389,88 @@ textarea.input-sleek {
     filter: brightness(1.1);
 }
 
+.action-button.small {
+    padding: 0 20px;
+    height: 100%;
+    border-radius: 10px;
+    font-size: 0.9rem;
+}
+
+/* --- Apple Toggle Switch (Crucial Fix) --- */
+.toggle-switch {
+    display: inline-block;
+    height: 31px;
+    position: relative;
+    width: 51px;
+}
+
+.toggle-switch input {
+    display: none;
+}
+
+.slider {
+    background-color: #39393d;
+    /* iOS Inactive Dark */
+    bottom: 0;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    background-color: #fff;
+    bottom: 2px;
+    content: "";
+    height: 27px;
+    left: 2px;
+    position: absolute;
+    transition: .4s;
+    width: 27px;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input:checked+.slider {
+    background-color: #30d158;
+    /* iOS Green (Success) */
+}
+
+input:checked+.slider:before {
+    transform: translateX(20px);
+}
+
+/* Logic Row Styling */
+.logic-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--im-border);
+}
+
+.logic-row:last-child {
+    border-bottom: none;
+}
+
+.logic-info {
+    padding-right: 24px;
+}
+
+.logic-info h4 {
+    margin-bottom: 4px;
+    font-size: 1rem;
+}
+
+.logic-info p {
+    font-size: 0.9rem;
+    color: var(--im-text-secondary);
+    margin: 0;
+}
+
 /* --- Table Styles --- */
 .asset-table,
 .measures-table {
@@ -274,79 +496,79 @@ textarea.input-sleek {
     color: var(--im-text-primary);
 }
 
-/* --- Landing Page Hero (Internal Step 0) --- */
-.internal-landing {
+.badge-type,
+.badge-crit {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-type.primary {
+    background: rgba(64, 200, 224, 0.15);
+    color: #40c8e0;
+}
+
+.badge-type.secondary {
+    background: rgba(142, 142, 147, 0.15);
+    color: #8e8e93;
+}
+
+.badge-crit.crit-1 {
+    color: #81C784;
+    background: rgba(129, 199, 132, 0.1);
+}
+
+.badge-crit.crit-2 {
+    color: #FFD54F;
+    background: rgba(255, 213, 79, 0.1);
+}
+
+.badge-crit.crit-3 {
+    color: #FF8A65;
+    background: rgba(255, 138, 101, 0.1);
+}
+
+.badge-crit.crit-4 {
+    color: #E57373;
+    background: rgba(229, 115, 115, 0.1);
+}
+
+/* --- Form Layout Helpers --- */
+.form-row {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 80vh;
-    text-align: center;
+    gap: 16px;
+    align-items: flex-end;
 }
 
-.landing-cards-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    margin-top: 40px;
-    width: 100%;
-    max-width: 900px;
+.form-col {
+    flex: 1;
 }
 
-.action-card {
-    background: var(--im-bg-panel);
-    border: 1px solid var(--im-border);
-    border-radius: var(--im-radius);
-    padding: 40px;
+.form-col.small {
+    flex: 0 0 140px;
+}
+
+.form-col.action {
+    flex: 0 0 auto;
+}
+
+.remove-btn {
+    background: transparent;
+    border: none;
+    color: var(--im-text-secondary);
+    font-size: 1.2rem;
     cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-    position: relative;
+    padding: 4px 8px;
 }
 
-.action-card .icon {
-    font-size: 32px;
-    margin-bottom: 24px;
-    background: rgba(255, 255, 255, 0.1);
-    width: 64px;
-    height: 64px;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.remove-btn:hover {
+    color: var(--im-danger);
 }
 
-.action-card h3 {
-    font-size: 1.5rem;
-    margin-bottom: 12px;
-    font-weight: 700;
-}
-
-/* Animations */
-.fade-in {
-    animation: fadeIn 0.5s ease-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Mobile Responsiveness */
 @media (max-width: 768px) {
     .module-wrapper {
         flex-direction: column;
-        overflow-y: auto;
     }
 
     .sidebar {
@@ -363,5 +585,20 @@ textarea.input-sleek {
 
     .landing-cards-row {
         grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-col.small {
+        flex: 1;
+    }
+
+    .action-button.small {
+        width: 100%;
+        height: 44px;
+        margin-top: 12px;
     }
 }

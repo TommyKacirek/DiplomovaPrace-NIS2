@@ -1,25 +1,17 @@
-/* App.css - Strict Apple Dark Mode Design System */
+/* App.css - Unified NIS2 Portal Theme */
 
 :root {
-  /* --- Palette (Strict) --- */
+  /* --- Palette (Strict Black & Purple) --- */
   --bg-black: #000000;
-  /* Global Background */
   --bg-card: #1c1c1e;
-  /* Card Background */
   --bg-card-hover: #2c2c2e;
-  /* Hover State */
   --bg-input: #2c2c2e;
-  /* Input/Select Background */
 
   /* --- Accents --- */
   --accent-purple: #bf5af2;
-  /* Primary Action */
   --accent-green: #32d74b;
-  /* Success */
   --accent-red: #ff453a;
-  /* Error */
   --accent-blue: #0a84ff;
-  /* Info */
 
   /* --- Text --- */
   --text-main: #ffffff;
@@ -28,16 +20,12 @@
 
   /* --- Borders & Shapes --- */
   --border-subtle: rgba(255, 255, 255, 0.1);
-  /* 1px solid subtle */
   --radius-card: 20px;
   --radius-btn: 14px;
   --radius-input: 10px;
 
   /* --- Typography --- */
   --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
-
-  /* --- Layout --- */
-  --container-width: 1200px;
 }
 
 html,
@@ -52,16 +40,18 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   overflow-y: auto;
-  /* Enable vertical scrolling */
+  /* Force scroll capability */
 }
 
 /* --- Layout Container --- */
 .app-container {
-  max-width: var(--container-width);
+  max-width: 1200px;
+  /* Strict 1200px per request */
+  width: 100%;
   margin: 0 auto;
+  /* Centered */
   padding: 40px 20px;
   box-sizing: border-box;
-  width: 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -71,7 +61,6 @@ body {
   max-width: 100%;
   padding: 0;
   height: auto;
-  /* Allow height to grow */
   min-height: 100vh;
 }
 
@@ -129,14 +118,12 @@ h3.subtitle {
 
 .text-gradient-apple {
   background: linear-gradient(135deg, #bf5af2 0%, #ffcc00 100%);
-  /* Purple to Gold/Warmer */
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   color: var(--accent-purple);
-  /* Fallback */
 }
 
-/* --- Mode Switch (macOS Segmented Control) --- */
+/* --- Mode Switch --- */
 .mode-switch {
   background: #2c2c2e;
   padding: 3px;
@@ -189,7 +176,6 @@ h3.subtitle {
   width: 100%;
   box-sizing: border-box;
   position: relative;
-  /* Ensure it flows normally */
 }
 
 /* 2. Buttons */
@@ -251,7 +237,6 @@ select,
   box-sizing: border-box;
   transition: all 0.2s;
   margin-top: 8px;
-  /* Breathing room */
 }
 
 input:focus,

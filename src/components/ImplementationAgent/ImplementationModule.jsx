@@ -4,6 +4,19 @@ import RiskAndAssetStep from './RiskAndAssetStep';
 import SecurityMeasuresTable from './SecurityMeasuresTable';
 import './ImplementationModule.css';
 
+// SVG Icons for Sidebar & Landing
+const Icons = {
+    Home: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>,
+    Identity: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>,
+    Shield: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>,
+    List: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>,
+    File: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>,
+    Exit: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>,
+    // New Icons for Landing (Bigger size handled by CSS wrapper, but same viewBox)
+    Bolt: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>,
+    FolderOpen: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+};
+
 export default function ImplementationModule(props) {
     const [currentStep, setCurrentStep] = useState(0); // 0 = Internal Landing
     const [moduleData, setModuleData] = useState({
@@ -72,7 +85,7 @@ export default function ImplementationModule(props) {
                                 className="action-card"
                                 onClick={() => setCurrentStep(1)}
                             >
-                                <span className="icon">⚡</span>
+                                <span className="icon"><Icons.Bolt /></span>
                                 <h3>Zahájit implementaci</h3>
                                 <p>Spustit nového průvodce identifikací aktiv a rizik.</p>
                             </div>
@@ -81,7 +94,7 @@ export default function ImplementationModule(props) {
                                 className="action-card"
                                 onClick={() => fileInputRef.current?.click()}
                             >
-                                <span className="icon">📂</span>
+                                <span className="icon"><Icons.FolderOpen /></span>
                                 <h3>Načíst audit</h3>
                                 <p>Nahrát existující .json soubor a pokračovat v práci.</p>
                                 <input
@@ -134,19 +147,19 @@ export default function ImplementationModule(props) {
                 </div>
                 <nav className="stepper-nav">
                     <div className={`step-item ${currentStep === 0 ? 'active' : ''}`} onClick={() => setCurrentStep(0)}>
-                        <div className="step-number">0</div> Start
+                        <div className="step-icon-wrap"><Icons.Home /></div> Start
                     </div>
                     <div className={`step-item ${currentStep === 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}>
-                        <div className="step-number">1</div> Identifikace
+                        <div className="step-icon-wrap"><Icons.Identity /></div> Identifikace
                     </div>
                     <div className={`step-item ${currentStep === 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}>
-                        <div className="step-number">2</div> Aktiva & Rizika
+                        <div className="step-icon-wrap"><Icons.Shield /></div> Aktiva & Rizika
                     </div>
                     <div className={`step-item ${currentStep === 3 ? 'active' : ''} ${currentStep > 3 ? 'completed' : ''}`}>
-                        <div className="step-number">3</div> Opatření
+                        <div className="step-icon-wrap"><Icons.List /></div> Opatření
                     </div>
                     <div className={`step-item ${currentStep === 4 ? 'active' : ''}`}>
-                        <div className="step-number">4</div> Report
+                        <div className="step-icon-wrap"><Icons.File /></div> Report
                     </div>
                 </nav>
                 <div style={{ marginTop: 'auto', paddingTop: '2rem', borderTop: '1px solid var(--im-border)' }}>
@@ -155,11 +168,13 @@ export default function ImplementationModule(props) {
                         onClick={props.onExit}
                         style={{ marginBottom: '1rem', color: '#ff453a' }}
                     >
-                        <div className="step-number" style={{ background: 'rgba(255, 69, 58, 0.1)', color: '#ff453a' }}>✕</div>
+                        <div className="step-icon-wrap" style={{ background: 'rgba(255, 69, 58, 0.1)', color: '#ff453a' }}>
+                            <Icons.Exit />
+                        </div>
                         Ukončit
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'rgba(235, 235, 245, 0.3)' }}>
-                        Verze 2.1 (Apple) <br />
+                        Verze 2.2 (Final) <br />
                         Vyhláška 410/2025 Sb.
                     </div>
                 </div>
