@@ -1,3 +1,6 @@
+import CryptoJS from 'crypto-js';
+import { generatePDFReport } from '../../utils/pdfExport';
+
 import React, { useState, useRef } from 'react';
 import IdentificationStep from './IdentificationStep';
 import RiskAndAssetStep from './RiskAndAssetStep';
@@ -36,16 +39,30 @@ export default function ImplementationModule(props) {
         if (currentStep < 4) setCurrentStep(prev => prev + 1);
     };
 
-    const exportAuditToJson = () => {
-        const dataStr = JSON.stringify(moduleData, null, 2);
-        const blob = new Blob([dataStr], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `nis2_audit_${new Date().toISOString().slice(0, 10)}.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    const exportEncryptedJson = () => {
+        const password = prompt("Zadejte heslo pro zašifrování zálohy:\n(Toto heslo bude nutné pro budoucí obnovení)");
+        if (!password) return; // User cancelled
+
+        try {
+            const jsonStr = JSON.stringify(moduleData);
+            // Encrypt using AES
+            const encrypted = CryptoJS.AES.encrypt(jsonStr, password).toString();
+
+            // Add custom header to identify file type
+            const fileContent = "NIS2-AES-ENCRYPTED-V1:" + encrypted;
+
+            const blob = new Blob([fileContent], { type: "application/nis2-encrypted" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `nis2_backup_secure_${new Date().toISOString().slice(0, 10)}.nis2`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (err) {
+            console.error(err);
+            alert("Chyba při šifrování zálohy.");
+        }
     };
 
     const importAuditFromJson = (event) => {
@@ -54,20 +71,58 @@ export default function ImplementationModule(props) {
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
-                const importedData = JSON.parse(e.target.result);
-                if (importedData.legalContext || importedData.riskData) {
-                    setModuleData(importedData);
+                const content = e.target.result;
+                let parsedData;
+
+                // 1. Try Legacy JSON
+                if (content.trim().startsWith("{")) {
+                    parsedData = JSON.parse(content);
+                }
+                // 2. Try AES Encrypted
+                else if (content.startsWith("NIS2-AES-ENCRYPTED-V1:")) {
+                    const password = prompt("Zadejte heslo pro dešifrování zálohy:");
+                    if (!password) return;
+
+                    const encryptedData = content.replace("NIS2-AES-ENCRYPTED-V1:", "");
+                    const bytes = CryptoJS.AES.decrypt(encryptedData, password);
+                    const decryptedStr = bytes.toString(CryptoJS.enc.Utf8);
+
+                    if (!decryptedStr) throw new Error("Wrong password");
+
+                    parsedData = JSON.parse(decryptedStr);
+                }
+                // 3. Try Old Obfuscated (Backward Compatibility)
+                else {
+                    try {
+                        const decoded = atob(content);
+                        const salt = "NIS2-SECURE-BACKUP-V1-";
+                        if (decoded.startsWith(salt)) {
+                            const jsonStr = decodeURIComponent(decoded.slice(salt.length));
+                            parsedData = JSON.parse(jsonStr);
+                        } else {
+                            throw new Error("Invalid format");
+                        }
+                    } catch (err) {
+                        alert('Chyba: Neplatné heslo nebo poškozený soubor.');
+                        return;
+                    }
+                }
+
+                if (parsedData && (parsedData.legalContext || parsedData.riskData)) {
+                    setModuleData(parsedData);
                     setCurrentStep(1);
                 } else {
-                    alert('Chyba: Neplatný formát souboru.');
+                    alert('Chyba: Neznámý formát dat.');
                 }
+
             } catch (err) {
                 console.error(err);
-                alert('Chyba při čtení souboru.');
+                alert('Chyba: Nepodařilo se načíst zálohu (špatné heslo?).');
             }
         };
         reader.readAsText(file);
     };
+
 
     // --- Content Rendering ---
     const renderContent = () => {
@@ -124,12 +179,32 @@ export default function ImplementationModule(props) {
                 return (
                     <div className="glass-panel fade-in" style={{ textAlign: 'center', padding: '4rem' }}>
                         <div style={{ fontSize: '4rem', marginBottom: '1rem', color: '#10b981' }}>✓</div>
-                        <h2>Audit Dokončen</h2>
-                        <p style={{ marginBottom: '2rem' }}>Všechna data byla zpracována.</p>
-                        <button className="action-button primary large" onClick={exportAuditToJson}>
-                            Stáhnout JSON Report
-                        </button>
-                        <div style={{ marginTop: '2rem' }}>
+                        <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Implementace Dokončena</h2>
+                        <p style={{ marginBottom: '3rem', maxWidth: '600px', margin: '0 auto 3rem auto', color: 'rgba(235,235,245,0.6)' }}>
+                            Všechna data byla úspěšně zpracována. Nyní můžete vygenerovat oficiální report pro kontrolní orgány nebo si stáhnout zabezpečenou zálohu pro budoucí úpravy.
+                        </p>
+
+                        <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                            <div style={{ textAlign: 'left', maxWidth: '300px' }}>
+                                <button className="action-button primary large" style={{ width: '100%', marginBottom: '1rem' }} onClick={() => generatePDFReport(moduleData)}>
+                                    📄 Vygenerovat PDF Audit
+                                </button>
+                                <p style={{ fontSize: '0.85rem', color: 'rgba(235,235,245,0.4)', lineHeight: 1.4 }}>
+                                    Oficiální dokument obsahující identifikaci aktiv, analýzu rizik a navržená opatření. Vhodné pro tisk a audit.
+                                </p>
+                            </div>
+
+                            <div style={{ textAlign: 'left', maxWidth: '300px' }}>
+                                <button className="action-button large" style={{ width: '100%', marginBottom: '1rem', border: '1px solid rgba(255,255,255,0.1)' }} onClick={exportEncryptedJson}>
+                                    🔒 Stáhnout Šifrovanou Zálohu
+                                </button>
+                                <p style={{ fontSize: '0.85rem', color: 'rgba(235,235,245,0.4)', lineHeight: 1.4 }}>
+                                    Technický soubor (.nis2) pro budoucí obnovení práce v tomto portálu. Data jsou chráněna proti přímému čtení.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div style={{ marginTop: '4rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                             <button className="action-button" onClick={() => setCurrentStep(0)}>Zpět na hlavní menu</button>
                         </div>
                     </div>

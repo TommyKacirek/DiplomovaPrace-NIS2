@@ -1,11 +1,24 @@
 import React from 'react';
 import { pdf, Document, Page, Text, View, StyleSheet, Font, Svg, Path } from '@react-pdf/renderer';
+import CryptoJS from 'crypto-js';
 
-// ==========================================
-// 1. DATA: SLUŽBY 
-// ==========================================
+// ... (rest of imports/data)
+
+const colors = {
+  brand: '#BF5AF2',      // Apple Purple
+  brandDark: '#AF52DE',  // Deep Purple
+  success: '#32D74B',    // Apple Green
+  warning: '#FF9F0A',    // Apple Orange
+  danger: '#FF453A',     // Apple Red
+  textMain: '#1C1C1E',   // Dark Gray (for printed paper - keeping it readable, strict black #000000 might be too harsh for text on white paper, but prompt said "Vše v černé (#000000) a fialové". I will use Black for headers.)
+  textSec: '#6e6e73',    // Light Gray
+  bgPage: '#FFFFFF',     // White paper
+  white: '#FFFFFF',
+  border: '#E5E5EA',
+  black: '#000000'
+};
 const SERVICES_DATA_DB = {
-  "Veřejná správa": [ { id: '1.1', label: 'Výkon svěřených pravomocí' } ],
+  "Veřejná správa": [{ id: '1.1', label: 'Výkon svěřených pravomocí' }],
   "Energetika – Elektřina": [
     { id: '2.1', label: 'Výroba elektřiny' },
     { id: '2.2', label: 'Provoz přenosové soustavy elektřiny' },
@@ -255,39 +268,28 @@ Font.register({
   ],
 });
 
-const colors = {
-  brand: '#3B82F6',      // Modern Blue
-  brandDark: '#1E3A8A',  // Deep Blue
-  success: '#10B981',    // Emerald
-  warning: '#F59E0B',    // Amber
-  danger: '#EF4444',     // Red
-  textMain: '#1E293B',   // Slate 800
-  textSec: '#64748B',    // Slate 500
-  bgPage: '#F1F5F9',     // Slate 100 (Light gray bg)
-  white: '#FFFFFF',
-  border: '#E2E8F0'
-};
+
 
 const styles = StyleSheet.create({
   page: { fontFamily: 'Roboto', backgroundColor: colors.bgPage, paddingBottom: 60 },
-  
+
   // -- Header Area  --
   headerStrip: { height: 8, backgroundColor: colors.brand },
   header: { padding: 40, paddingBottom: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.white },
-  logoText: { fontSize: 22, fontWeight: 700, color: colors.textMain },
+  logoText: { fontSize: 22, fontWeight: 700, color: colors.black },
   logoSub: { fontSize: 10, color: colors.textSec, textTransform: 'uppercase', letterSpacing: 1 },
   dateBlock: { alignItems: 'flex-end' },
   dateLabel: { fontSize: 8, color: colors.textSec },
-  dateValue: { fontSize: 10, fontWeight: 500, color: colors.textMain },
+  dateValue: { fontSize: 10, fontWeight: 500, color: colors.black },
 
   // -- Main Card --
   card: { marginHorizontal: 40, marginTop: 20, padding: 25, backgroundColor: colors.white, borderRadius: 8, border: `1px solid ${colors.border}` },
-  
+
   // Result Badge
   statusRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
   badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, alignItems: 'center' },
   badgeText: { fontSize: 11, fontWeight: 700, color: colors.white, textTransform: 'uppercase' },
-  
+
   // Score Circle
   scoreBlock: { alignItems: 'flex-end' },
   scoreBig: { fontSize: 32, fontWeight: 700, color: colors.brand },
@@ -297,35 +299,36 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', borderTop: `1px solid ${colors.border}`, paddingTop: 15, marginTop: 5 },
   col: { flex: 1 },
   label: { fontSize: 8, color: colors.textSec, textTransform: 'uppercase', marginBottom: 4 },
-  value: { fontSize: 11, fontWeight: 500, color: colors.textMain },
+  value: { fontSize: 11, fontWeight: 500, color: colors.black },
 
   // Reasoning
-  reasonBox: { marginTop: 20, padding: 12, backgroundColor: '#EFF6FF', borderRadius: 6, borderLeft: `3px solid ${colors.brand}` },
-  reasonText: { fontSize: 10, color: '#1E40AF', lineHeight: 1.4 },
+  reasonBox: { marginTop: 20, padding: 12, backgroundColor: '#F5F5F7', borderRadius: 6, borderLeft: `3px solid ${colors.brand}` },
+  reasonText: { fontSize: 10, color: colors.black, lineHeight: 1.4 },
 
   // -- Content Sections --
-  sectionTitle: { fontSize: 13, fontWeight: 700, color: colors.textMain, marginTop: 30, marginBottom: 10, marginLeft: 40, textTransform: 'uppercase', letterSpacing: 0.5 },
-  
+  sectionTitle: { fontSize: 14, fontWeight: 700, color: colors.black, marginTop: 30, marginBottom: 15, marginLeft: 40, textTransform: 'uppercase', letterSpacing: 0.5 },
+
   // Tables (Gap Analysis)
-  tableContainer: { marginHorizontal: 40, backgroundColor: colors.white, borderRadius: 8, overflow: 'hidden', border: `1px solid ${colors.border}` },
-  tableHeader: { flexDirection: 'row', backgroundColor: '#F8FAFC', paddingVertical: 10, paddingHorizontal: 15, borderBottom: `1px solid ${colors.border}` },
-  tableRow: { flexDirection: 'row', paddingVertical: 10, paddingHorizontal: 15, borderBottom: `1px solid ${colors.border}`, alignItems: 'center' },
-  th: { fontSize: 9, fontWeight: 700, color: colors.textSec, textTransform: 'uppercase' },
-  tdTitle: { fontSize: 10, color: colors.textMain, fontWeight: 500 },
-  tdArt: { fontSize: 9, color: colors.textSec },
-  
+  tableContainer: { marginHorizontal: 40, borderRadius: 4, overflow: 'hidden', border: `1px solid ${colors.black}` },
+  tableHeader: { flexDirection: 'row', backgroundColor: '#F2F2F7', paddingVertical: 8, paddingHorizontal: 10, borderBottom: `1px solid ${colors.black}` },
+  tableRow: { flexDirection: 'row', paddingVertical: 10, paddingHorizontal: 10, borderBottom: `1px solid ${colors.border}`, alignItems: 'flex-start' },
+  th: { fontSize: 9, fontWeight: 700, color: colors.black, textTransform: 'uppercase' },
+  tdTitle: { fontSize: 10, color: colors.black, fontWeight: 500 },
+  tdArt: { fontSize: 9, color: colors.black },
+  tdGray: { fontSize: 9, color: colors.textSec },
+
   // Implementation Plan (OSS Stack) - přizpůsobeno designu
   implCard: { marginHorizontal: 40, marginBottom: 12, padding: 15, backgroundColor: colors.white, borderRadius: 8, border: `1px solid ${colors.border}` },
-  implTitle: { fontSize: 10, fontWeight: 700, color: colors.brandDark, marginBottom: 4 },
+  implTitle: { fontSize: 10, fontWeight: 700, color: colors.brand, marginBottom: 4 },
   implDesc: { fontSize: 9, color: colors.textSec, marginBottom: 6, fontStyle: 'italic' },
-  implSol: { fontSize: 9, color: colors.textMain, lineHeight: 1.4, marginBottom: 8 },
+  implSol: { fontSize: 9, color: colors.black, lineHeight: 1.4, marginBottom: 8 },
   stackRow: { flexDirection: 'row', flexWrap: 'wrap' },
-  stackBadge: { backgroundColor: '#EFF6FF', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 4, marginRight: 6, border: '1px solid #DBEAFE' },
-  stackText: { fontSize: 8, color: '#1D4ED8', fontWeight: 500 },
+  stackBadge: { backgroundColor: '#F2F2F7', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 4, marginRight: 6, border: '1px solid #E5E5EA' },
+  stackText: { fontSize: 8, color: colors.black, fontWeight: 500 },
 
   // Footer
-  footer: { position: 'absolute', bottom: 20, left: 0, right: 0, textAlign: 'center' },
-  footerText: { fontSize: 8, color: '#94A3B8' }
+  footer: { position: 'absolute', bottom: 20, left: 40, right: 40, textAlign: 'center', borderTop: `1px solid ${colors.border}`, paddingTop: 10 },
+  footerText: { fontSize: 8, color: colors.textSec, marginBottom: 4 }
 });
 
 // ==========================================
@@ -334,13 +337,13 @@ const styles = StyleSheet.create({
 
 const IconCheck = () => (
   <Svg width="12" height="12" viewBox="0 0 24 24">
-    <Path d="M20 6L9 17l-5-5" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    <Path d="M20 6L9 17l-5-5" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
   </Svg>
 );
 
 const IconCross = () => (
   <Svg width="12" height="12" viewBox="0 0 24 24">
-    <Path d="M18 6L6 18M6 6l12 12" stroke="#EF4444" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    <Path d="M18 6L6 18M6 6l12 12" stroke="#EF4444" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
   </Svg>
 );
 
@@ -348,7 +351,7 @@ const IconCross = () => (
 const IconShield = () => (
   <Svg width="40" height="40" viewBox="0 0 24 24">
     <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="#3B82F6" opacity={0.1} />
-    <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
   </Svg>
 );
 
@@ -395,8 +398,8 @@ const ReportDocument = ({ data }) => {
     });
   }
 
-  const percent = activeMeasuresDB.length > 0 
-    ? Math.round((implementedList.length / activeMeasuresDB.length) * 100) 
+  const percent = activeMeasuresDB.length > 0
+    ? Math.round((implementedList.length / activeMeasuresDB.length) * 100)
     : 0;
 
   // D. Služby
@@ -412,14 +415,14 @@ const ReportDocument = ({ data }) => {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        
+
         {/* Header Strip */}
         <View style={styles.headerStrip} />
-        
+
         {/* Top Bar  */}
         <View style={styles.header}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <IconShield /> 
+            <IconShield />
             <View style={{ marginLeft: 12 }}>
               <Text style={styles.logoSub}>AUDIT KYBERNETICKÉ BEZPEČNOSTI</Text>
               <Text style={styles.logoText}>NIS2 Compliance Report</Text>
@@ -434,7 +437,7 @@ const ReportDocument = ({ data }) => {
         {/* Dashboard Card */}
         <View style={styles.card}>
           <View style={styles.statusRow}>
-            <View style={{...styles.badge, backgroundColor: badgeBg}}>
+            <View style={{ ...styles.badge, backgroundColor: badgeBg }}>
               <Text style={styles.badgeText}>{badgeLabel}</Text>
             </View>
             {!isNone && (
@@ -446,23 +449,23 @@ const ReportDocument = ({ data }) => {
           </View>
 
           <View style={styles.grid}>
-             <View style={styles.col}>
-               <Text style={styles.label}>Velikost podniku</Text>
-               <Text style={styles.value}>{companySize || "Nezadáno"}</Text>
-             </View>
-             <View style={styles.col}>
-               <Text style={styles.label}>Sektor</Text>
-               <Text style={styles.value}>{sector || "Nezadáno"}</Text>
-             </View>
-             <View style={styles.col}>
-               <Text style={styles.label}>Počet zaměstnanců</Text>
-               <Text style={styles.value}>{data.employeesCount || "-"}</Text>
-             </View>
+            <View style={styles.col}>
+              <Text style={styles.label}>Velikost podniku</Text>
+              <Text style={styles.value}>{companySize || "Nezadáno"}</Text>
+            </View>
+            <View style={styles.col}>
+              <Text style={styles.label}>Sektor</Text>
+              <Text style={styles.value}>{sector || "Nezadáno"}</Text>
+            </View>
+            <View style={styles.col}>
+              <Text style={styles.label}>Počet zaměstnanců</Text>
+              <Text style={styles.value}>{data.employeesCount || "-"}</Text>
+            </View>
           </View>
 
           <View style={styles.reasonBox}>
             <Text style={styles.reasonText}>
-              <Text style={{fontWeight: 700}}>Důvod klasifikace: </Text>
+              <Text style={{ fontWeight: 700 }}>Důvod klasifikace: </Text>
               {complianceReasoning}
             </Text>
           </View>
@@ -473,21 +476,21 @@ const ReportDocument = ({ data }) => {
         {/* 1. IMPLEMENTOVÁNO */}
         {!isNone && implementedList.length > 0 && (
           <View wrap={false}>
-            <Text style={{...styles.sectionTitle, color: colors.success}}>
+            <Text style={{ ...styles.sectionTitle, color: colors.success }}>
               ✅ Již implementováno
             </Text>
             <View style={styles.tableContainer}>
               <View style={styles.tableHeader}>
-                <Text style={{...styles.th, flex: 4}}>Opatření</Text>
-                <Text style={{...styles.th, flex: 1}}>Legislativa</Text>
-                <Text style={{...styles.th, flex: 1, textAlign: 'right'}}>Stav</Text>
+                <Text style={{ ...styles.th, flex: 4 }}>Opatření</Text>
+                <Text style={{ ...styles.th, flex: 1 }}>Legislativa</Text>
+                <Text style={{ ...styles.th, flex: 1, textAlign: 'right' }}>Stav</Text>
               </View>
               {implementedList.map((m, i) => (
                 <View key={i} style={styles.tableRow}>
                   <View style={{ flex: 4 }}>
                     <Text style={styles.tdTitle}>{m.title}</Text>
                   </View>
-                  <Text style={{...styles.tdArt, flex: 1}}>{m.article}</Text>
+                  <Text style={{ ...styles.tdArt, flex: 1 }}>{m.article}</Text>
                   <View style={{ flex: 1, alignItems: 'flex-end' }}>
                     <IconCheck />
                   </View>
@@ -500,14 +503,14 @@ const ReportDocument = ({ data }) => {
         {/* 2. K DOŘEŠENÍ */}
         {!isNone && missingList.length > 0 && (
           <View wrap={false}>
-            <Text style={{...styles.sectionTitle, color: colors.danger}}>
-               K dořešení (Gap Analýza)
+            <Text style={{ ...styles.sectionTitle, color: colors.danger }}>
+              K dořešení (Gap Analýza)
             </Text>
             <View style={styles.tableContainer}>
               <View style={styles.tableHeader}>
-                <Text style={{...styles.th, flex: 4}}>Chybějící opatření</Text>
-                <Text style={{...styles.th, flex: 1}}>Legislativa</Text>
-                <Text style={{...styles.th, flex: 1, textAlign: 'right'}}>Stav</Text>
+                <Text style={{ ...styles.th, flex: 4 }}>Chybějící opatření</Text>
+                <Text style={{ ...styles.th, flex: 1 }}>Legislativa</Text>
+                <Text style={{ ...styles.th, flex: 1, textAlign: 'right' }}>Stav</Text>
               </View>
               {missingList.map((m, i) => (
                 <View key={i} style={styles.tableRow}>
@@ -515,7 +518,7 @@ const ReportDocument = ({ data }) => {
                     <Text style={styles.tdTitle}>{m.title}</Text>
                     <Text style={{ fontSize: 8, color: '#94A3B8' }}>Nutné doplnit dokumentaci</Text>
                   </View>
-                  <Text style={{...styles.tdArt, flex: 1}}>{m.article}</Text>
+                  <Text style={{ ...styles.tdArt, flex: 1 }}>{m.article}</Text>
                   <View style={{ flex: 1, alignItems: 'flex-end' }}>
                     <IconCross />
                   </View>
@@ -531,7 +534,7 @@ const ReportDocument = ({ data }) => {
             {/*  Header Strip pro novou stránku */}
             <View style={styles.headerStrip} />
             <Text style={styles.sectionTitle}>Návrh technického řešení (OSS Stack)</Text>
-            
+
             <Text style={{ fontSize: 10, color: colors.textMain, marginHorizontal: 40, marginBottom: 15, lineHeight: 1.5 }}>
               Následující architektura využívá ověřené Open Source nástroje pro splnění požadavků vyhlášky č. 410/2025 Sb. bez licenčních poplatků.
             </Text>
@@ -540,12 +543,12 @@ const ReportDocument = ({ data }) => {
               <View key={i} style={styles.implCard} wrap={false}>
                 <Text style={styles.implTitle}>{plan.section}</Text>
                 <Text style={styles.implDesc}>{plan.description}</Text>
-                
+
                 <Text style={{ fontSize: 9, fontWeight: 700, marginTop: 4, marginBottom: 2, color: colors.textMain }}>
                   Řešení:
                 </Text>
                 <Text style={styles.implSol}>{plan.solution}</Text>
-                
+
                 <View style={styles.stackRow}>
                   {plan.stack.map((tech, t) => (
                     <View key={t} style={styles.stackBadge}>
@@ -568,14 +571,169 @@ const ReportDocument = ({ data }) => {
   );
 };
 
-// --- 7. EXPORT ---
+
+// ==========================================
+// 7. AGENT REPORT DOCUMENT
+// ==========================================
+
+const AgentReportDocument = ({ data }) => {
+  const { legalContext, riskData, finalMeasures } = data;
+  const today = new Date().toLocaleDateString('cs-CZ');
+  const measures = finalMeasures || [];
+
+  // Data hash calculation (Simulating integrity check of the export)
+  const dataString = JSON.stringify({ legalContext, riskData, finalMeasures });
+  const hash = CryptoJS.SHA256(dataString).toString(CryptoJS.enc.Hex).toUpperCase();
+  const shortHash = `${hash.substring(0, 8)}-${hash.substring(8, 12)}-${hash.substring(12, 16)}...`;
+
+  return (
+    <Document>
+      <Page size="A4" orientation="landscape" style={styles.page}>
+
+        {/* Header Strip */}
+        <View style={styles.headerStrip} />
+
+        {/* Top Bar  */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.logoText}>PŘEHLED BEZPEČNOSTNÍCH OPATŘENÍ</Text>
+            <Text style={styles.logoSub}>Příloha č. 1 vyhlášky č. 410/2025 Sb. (Vzor)</Text>
+          </View>
+          <View style={styles.dateBlock}>
+            <Text style={styles.dateLabel}>DATUM EXPORTU</Text>
+            <Text style={styles.dateValue}>{today}</Text>
+          </View>
+        </View>
+
+        {/* Intro Text */}
+        <View style={{ marginHorizontal: 40, marginBottom: 20 }}>
+          <Text style={{ fontSize: 10, color: colors.textSec }}>
+            Povinná osoba: <Text style={{ color: colors.black, fontWeight: 700 }}>{legalContext?.serviceDefinition || "Nezadáno"}</Text> |
+            Počet aktiv: <Text style={{ color: colors.black }}>{riskData?.assets?.length || 0}</Text>
+          </Text>
+        </View>
+
+        {/* Main Table (Appendix 1 Format) */}
+        <View style={styles.tableContainer}>
+          <View style={styles.tableHeader}>
+            <Text style={{ ...styles.th, width: '25%' }}>1. Opatření</Text>
+            <Text style={{ ...styles.th, width: '10%' }}>2. Stav</Text>
+            <Text style={{ ...styles.th, width: '35%' }}>3. Popis / Účinnost</Text>
+            <Text style={{ ...styles.th, width: '30%', textAlign: 'right' }}>4. Termín a Odpovědnost</Text>
+          </View>
+
+          {measures.length > 0 ? measures.map((m, i) => (
+            <View key={i} style={styles.tableRow} wrap={false}>
+
+              {/* 1. Opatření */}
+              <View style={{ width: '25%', paddingRight: 5 }}>
+                <Text style={styles.tdTitle}>{m.title}</Text>
+                <Text style={{ fontSize: 8, color: colors.textSec }}>{m.desc}</Text>
+                {m.type === 'MANDATORY' && (
+                  <Text style={{ fontSize: 8, color: colors.danger, fontWeight: 700, marginTop: 2 }}>[POVINNÉ]</Text>
+                )}
+              </View>
+
+              {/* 2. Stav */}
+              <View style={{ width: '10%' }}>
+                <Text style={{
+                  fontSize: 9,
+                  fontWeight: 700,
+                  color: m.status === 'Zavedeno' ? colors.success : (m.status === 'V procesu' ? colors.warning : colors.danger)
+                }}>
+                  {m.status.toUpperCase()}
+                </Text>
+                {m.status === 'Zavedeno' && (
+                  <Text style={{ fontSize: 8, color: colors.textSec, marginTop: 2 }}>
+                    Revize: {m.lastReviewDate || "N/A"}
+                  </Text>
+                )}
+              </View>
+
+              {/* 3. Popis / Účinnost */}
+              <View style={{ width: '35%', paddingRight: 5 }}>
+                <Text style={styles.tdArt}>
+                  <Text style={{ fontWeight: 700 }}>Plan/Do: </Text>
+                  {m.description || "Nedefinováno"}
+                </Text>
+                {m.status === 'Zavedeno' && m.effectiveness && (
+                  <Text style={{ ...styles.tdArt, marginTop: 4, color: colors.brandDark }}>
+                    <Text style={{ fontWeight: 700 }}>Check (Účinnost): </Text>
+                    {m.effectiveness}
+                  </Text>
+                )}
+              </View>
+
+              {/* 4. Termín a Odpovědnost */}
+              <View style={{ width: '30%', alignItems: 'flex-end', textAlign: 'right' }}>
+                <Text style={styles.tdTitle}>{m.responsibility || "Nepřiřazeno"}</Text>
+                <Text style={styles.tdGray}>Garant</Text>
+                {m.status !== 'Zavedeno' && (
+                  <Text style={{ ...styles.tdArt, marginTop: 4 }}>
+                    Termín: {m.deadline || "Neurčeno"}
+                  </Text>
+                )}
+              </View>
+
+            </View>
+          )) : (
+            <View style={styles.tableRow}>
+              <Text style={{ ...styles.tdArt, width: '100%', textAlign: 'center', padding: 20 }}>
+                Nebyla definována žádná opatření.
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Footer Area */}
+        <View style={styles.footer}>
+
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15, borderBottom: `1px solid ${colors.border}`, paddingBottom: 15 }}>
+            <View style={{ width: '45%' }}>
+              <Text style={{ fontSize: 8, color: colors.textSec, textTransform: 'uppercase', marginBottom: 30 }}>Podpis odpovědné osoby:</Text>
+              <View style={{ borderBottom: `1px solid ${colors.black}`, width: '100%' }} />
+            </View>
+            <View style={{ width: '45%' }}>
+              <Text style={{ fontSize: 8, color: colors.textSec, textTransform: 'uppercase', marginBottom: 30 }}>Podpis auditora / CISO:</Text>
+              <View style={{ borderBottom: `1px solid ${colors.black}`, width: '100%' }} />
+            </View>
+          </View>
+
+          <Text style={{ fontSize: 8, color: colors.textSec, fontStyle: 'italic', marginBottom: 5 }}>
+            Doložka: Tento dokument je nutné uchovávat pro potřeby auditu po dobu minimálně 4 let od data vyhotovení (§ 3 písm. c vyhlášky).
+            Obsah dokumentu je chráněn kontrolním součtem (Integrity Check).
+          </Text>
+          <Text style={{ fontSize: 8, color: colors.brand, fontFamily: 'Courier' }}>
+            SHA-256 SIGNATURE: {hash}
+          </Text>
+          <Text style={styles.footerText}>
+            Vygenerováno systémem NIS2 Agent | Strana 1
+          </Text>
+        </View>
+
+      </Page>
+    </Document>
+  );
+};
+
+// --- 8. EXPORT FUNCTION ---
 export const generatePDFReport = async (data) => {
   try {
-    const blob = await pdf(<ReportDocument data={data} />).toBlob();
+    // Rozhodneme, který report generovat
+    const isAgentReport = data.riskData || data.legalContext;
+    const DocumentComponent = isAgentReport ? AgentReportDocument : ReportDocument;
+
+    // Generování
+    const blob = await pdf(<DocumentComponent data={data} />).toBlob();
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
+
+    // Název souboru
+    const prefix = isAgentReport ? "NIS2_Implementace" : "NIS2_Audit";
+    const dateStr = new Date().toISOString().slice(0, 10);
     link.href = url;
-    link.download = `NIS2_Audit_${data.companySize || 'Report'}.pdf`;
+    link.download = `${prefix}_${dateStr}.pdf`;
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

@@ -17,8 +17,10 @@ export default function RiskAndAssetStep({ onComplete }) {
     const [newAsset, setNewAsset] = useState({
         name: '',
         type: 'Primární',
-        criticality: 'Nízká', // Default
-        recoveryPriority: '4'   // Default: Lowest (4)
+        confidentiality: 'Nízká',
+        integrity: 'Nízká',
+        availability: 'Nízká',
+        recoveryPriority: '4'
     });
 
     // --- Section 2: Smart Logic State ---
@@ -32,9 +34,19 @@ export default function RiskAndAssetStep({ onComplete }) {
     const handleAddAsset = () => {
         if (!newAsset.name.trim()) return;
 
+        // Calculate derived criticality (High/Critical if any CIA is High/Critical)
+        const levels = { 'Nízká': 1, 'Střední': 2, 'Vysoká': 3, 'Kritická': 4 };
+        const maxLevel = Math.max(
+            levels[newAsset.confidentiality],
+            levels[newAsset.integrity],
+            levels[newAsset.availability]
+        );
+        const derivedCriticality = Object.keys(levels).find(key => levels[key] === maxLevel);
+
         const assetEntry = {
             id: Date.now(),
-            ...newAsset
+            ...newAsset,
+            criticality: derivedCriticality
         };
 
         setAssets([...assets, assetEntry]);
@@ -42,7 +54,9 @@ export default function RiskAndAssetStep({ onComplete }) {
         setNewAsset({
             name: '',
             type: 'Primární',
-            criticality: 'Nízká',
+            confidentiality: 'Nízká',
+            integrity: 'Nízká',
+            availability: 'Nízká',
             recoveryPriority: '4'
         });
     };
@@ -129,11 +143,42 @@ export default function RiskAndAssetStep({ onComplete }) {
                         </div>
 
                         <div className="form-col small">
-                            <label>Kritikalita</label>
+                            <label>Důvěrnost (C)</label>
                             <select
                                 className="input-sleek"
-                                value={newAsset.criticality}
-                                onChange={(e) => handleAssetChange('criticality', e.target.value)}
+                                value={newAsset.confidentiality}
+                                onChange={(e) => handleAssetChange('confidentiality', e.target.value)}
+                                title="Požadavek na utajení dat"
+                            >
+                                <option value="Nízká">Nízká</option>
+                                <option value="Střední">Střední</option>
+                                <option value="Vysoká">Vysoká</option>
+                                <option value="Kritická">Kritická</option>
+                            </select>
+                        </div>
+
+                        <div className="form-col small">
+                            <label>Integrita (I)</label>
+                            <select
+                                className="input-sleek"
+                                value={newAsset.integrity}
+                                onChange={(e) => handleAssetChange('integrity', e.target.value)}
+                                title="Požadavek na správnost a úplnost"
+                            >
+                                <option value="Nízká">Nízká</option>
+                                <option value="Střední">Střední</option>
+                                <option value="Vysoká">Vysoká</option>
+                                <option value="Kritická">Kritická</option>
+                            </select>
+                        </div>
+
+                        <div className="form-col small">
+                            <label>Dostupnost (A)</label>
+                            <select
+                                className="input-sleek"
+                                value={newAsset.availability}
+                                onChange={(e) => handleAssetChange('availability', e.target.value)}
+                                title="Požadavek na přístupnost"
                             >
                                 <option value="Nízká">Nízká</option>
                                 <option value="Střední">Střední</option>
@@ -191,8 +236,8 @@ export default function RiskAndAssetStep({ onComplete }) {
                                     </td>
                                     <td>
                                         <span className={`badge-crit crit-${asset.criticality === 'Kritická' ? 4 :
-                                                asset.criticality === 'Vysoká' ? 3 :
-                                                    asset.criticality === 'Střední' ? 2 : 1
+                                            asset.criticality === 'Vysoká' ? 3 :
+                                                asset.criticality === 'Střední' ? 2 : 1
                                             }`}>
                                             {asset.criticality}
                                         </span>

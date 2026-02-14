@@ -87,6 +87,8 @@ export default function SecurityMeasuresTable({ smartLogic, roles, onComplete })
                 deadline: '',
                 priority: '2',
                 responsibility: '',
+                effectiveness: '', // PDCA: Check
+                lastReviewDate: '', // PDCA: Act/Review
                 recommendation
             };
         });
@@ -110,26 +112,29 @@ export default function SecurityMeasuresTable({ smartLogic, roles, onComplete })
     // --- 4. Validation Logic ---
     const validateRow = (row) => {
         // 1. Mandatory Text Fields
+        // Description is always required (how you do it OR why you don't)
         const hasDesc = row.description && row.description.trim().length > 0;
         const hasResp = row.responsibility && row.responsibility.trim().length > 0;
 
         if (!hasDesc || !hasResp) return false;
+
+        // 2. PDCA: Check - Effectiveness is required if "Zavedeno"
+        if (row.status === 'Zavedeno') {
+            if (!row.effectiveness || row.effectiveness.trim().length === 0) return false;
+        }
 
         return true;
     };
 
     // Check valid state for Submit trigger
     const canSubmit = measures.every(m => {
-        // 1. Fields must be filled
         if (!validateRow(m)) return false;
 
-        // 2. Mandatory measures CANNOT be "Nezavedeno" without specific justification 
-        // (For now, we enforce "Nezavedeno" is blocked for Mandatory unless we want to allow "Gap Analysis" output.
-        // The prompt says "strictly disabled if any mandatory row is 'Nezavedeno' (without justification)".
-        // Since we don't have a separate "Justification" field, let's assume Description acts as one. 
-        // STRICT INTERPRETATION: "Nezavedeno" + Description is ACCEPTABLE for Audit Gap Analysis.
-        // BUT prompt also says: "If mandatory row is 'Nezavedeno', display inline warning".
-        // Let's allow submit if description is present, but show warning visually.
+        // Mandatory measures check
+        // We allow "Nezavedeno" but it will be flagged in the report.
+        // However, the prompt says "nedovolí stav 'Nezavedeno' bez kritického varování".
+        // The warning is visual in the UI. We won't hard block submission if they really want to generate a non-compliant report.
+        // But we ensure they filled out the justification (description).
 
         return true;
     });
@@ -224,34 +229,62 @@ export default function SecurityMeasuresTable({ smartLogic, roles, onComplete })
                                     </td>
                                     <td>
                                         <div className="combined-inputs">
+                                            {/* PLAN/DO: Description */}
                                             <textarea
                                                 className={`input-sleek textarea-small ${!row.description ? 'input-error' : ''}`}
-                                                placeholder="Popis implementace / zdůvodnění..."
+                                                placeholder={isNezavedeno ? "Zdůvodnění nezavedení..." : "Popis způsobu realizace (Do)..."}
                                                 value={row.description}
                                                 onChange={(e) => handleRowChange(index, 'description', e.target.value)}
                                                 rows={2}
                                             />
 
-                                            {availableRoles.length > 0 ? (
-                                                <select
-                                                    className={`input-sleek small ${!row.responsibility ? 'input-error' : ''}`}
-                                                    value={row.responsibility}
-                                                    onChange={(e) => handleRowChange(index, 'responsibility', e.target.value)}
-                                                >
-                                                    <option value="">-- Vyberte odpovědnou osobu --</option>
-                                                    {availableRoles.map((role, i) => (
-                                                        <option key={i} value={role.name}>{role.name} ({role.cat})</option>
-                                                    ))}
-                                                </select>
-                                            ) : (
-                                                <input
-                                                    type="text"
-                                                    className={`input-sleek small ${!row.responsibility ? 'input-error' : ''}`}
-                                                    placeholder="Jméno odpovědné osoby..."
-                                                    value={row.responsibility}
-                                                    onChange={(e) => handleRowChange(index, 'responsibility', e.target.value)}
+                                            {/* CHECK: Effectiveness */}
+                                            {row.status === 'Zavedeno' && (
+                                                <textarea
+                                                    className={`input-sleek textarea-small ${!row.effectiveness ? 'input-error' : ''}`}
+                                                    placeholder="Vyhodnocení účinnosti (Check)..."
+                                                    value={row.effectiveness}
+                                                    onChange={(e) => handleRowChange(index, 'effectiveness', e.target.value)}
+                                                    rows={2}
+                                                    style={{ marginTop: '0.5rem', borderColor: '#a78bfa' }}
                                                 />
                                             )}
+
+                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                                {/* PLAN: Responsibility */}
+                                                {availableRoles.length > 0 ? (
+                                                    <select
+                                                        className={`input-sleek small ${!row.responsibility ? 'input-error' : ''}`}
+                                                        value={row.responsibility}
+                                                        onChange={(e) => handleRowChange(index, 'responsibility', e.target.value)}
+                                                        style={{ flex: 1 }}
+                                                    >
+                                                        <option value="">-- Garant --</option>
+                                                        {availableRoles.map((role, i) => (
+                                                            <option key={i} value={role.name}>{role.name} ({role.cat})</option>
+                                                        ))}
+                                                    </select>
+                                                ) : (
+                                                    <input
+                                                        type="text"
+                                                        className={`input-sleek small ${!row.responsibility ? 'input-error' : ''}`}
+                                                        placeholder="Garant..."
+                                                        value={row.responsibility}
+                                                        onChange={(e) => handleRowChange(index, 'responsibility', e.target.value)}
+                                                        style={{ flex: 1 }}
+                                                    />
+                                                )}
+
+                                                {/* ACT: Review Date */}
+                                                <input
+                                                    type="date"
+                                                    className="input-sleek small"
+                                                    title="Datum poslední revize"
+                                                    value={row.lastReviewDate}
+                                                    onChange={(e) => handleRowChange(index, 'lastReviewDate', e.target.value)}
+                                                    style={{ width: '130px' }}
+                                                />
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

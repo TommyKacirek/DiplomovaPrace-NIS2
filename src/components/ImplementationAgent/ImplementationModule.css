@@ -497,29 +497,64 @@ input:checked+.slider:before {
 }
 
 .badge-type,
-.badge-crit {
+.badge-crit,
+.cia-badge {
     padding: 4px 8px;
     border-radius: 6px;
     font-size: 0.8rem;
     font-weight: 600;
 }
 
+/* CIA Badge Specifics */
+.cia-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #2c2c2e;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #bf5af2;
+    /* Purple text for CIA */
+    margin-right: 4px;
+    padding: 2px 6px;
+    font-family: Menlo, monospace;
+    font-size: 0.7rem;
+}
+
+
+
+/* ... (rest of file) ... */
+
+/* Badge Updates */
 .badge-type.primary {
-    background: rgba(64, 200, 224, 0.15);
-    color: #40c8e0;
+    background: rgba(191, 90, 242, 0.15);
+    color: var(--im-primary);
 }
 
 .badge-type.secondary {
     background: rgba(142, 142, 147, 0.15);
-    color: #8e8e93;
+    color: #98989d;
 }
 
+/* CIA Badge */
+.cia-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #2c2c2e;
+    border: 1px solid #3a3a3c;
+    color: var(--im-text-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 4px;
+    font-family: monospace;
+}
+
+/* Crit Badges - slightly adjusted for better contrast on black */
 .badge-crit.crit-1 {
-    color: #81C784;
-    background: rgba(129, 199, 132, 0.1);
+    color: #30d158;
+    background: rgba(48, 209, 88, 0.1);
 }
 
-.badge-crit.crit-2 {
+... .badge-crit.crit-2 {
     color: #FFD54F;
     background: rgba(255, 213, 79, 0.1);
 }
