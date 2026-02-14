@@ -1,356 +1,97 @@
+/* SummaryPage.css - Unified Apple Dark Mode */
+
 .summary-box {
-  border-radius: 12px;
-  padding: 25px;
-  margin-bottom: 25px;
-  border: 2px solid;
+  border-radius: var(--radius-card);
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .summary-box h3 {
-  margin-top: 0;
-  font-size: 22px;
-  margin-bottom: 15px;
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+  color: var(--text-main);
 }
 
 .summary-box p {
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.6;
-  color: #b9e3fa;
+  color: var(--text-dim);
 }
 
+/* Status Colors (Subtle Text/Border, not full backgrounds) */
 .summary-none {
-  border-color: #4caf50;
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(56, 142, 60, 0.1) 100%);
-}
-
-.summary-none h3 {
-  color: #4caf50;
+  border-left: 4px solid var(--accent-green);
 }
 
 .summary-lower {
-  border-color: #ff9800;
-  background: linear-gradient(135deg, rgba(255, 152, 0, 0.15) 0%, rgba(245, 124, 0, 0.1) 100%);
-}
-
-.summary-lower h3 {
-  color: #ff9800;
+  border-left: 4px solid #ff9f0a;
 }
 
 .summary-higher {
-  border-color: #f44336;
-  background: linear-gradient(135deg, rgba(244, 67, 54, 0.15) 0%, rgba(229, 57, 53, 0.1) 100%);
-}
-
-.summary-higher h3 {
-  color: #f44336;
+  border-left: 4px solid var(--accent-red);
 }
 
 .reasoning-box {
-  margin-top: 20px;
-  padding: 15px;
-  background: rgba(33, 176, 219, 0.15);
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  /* Slight lift */
   border-radius: 8px;
-  border-left: 4px solid #21b0db;
 }
 
 .reasoning-box h4 {
-  color: #bdeafd;
-  margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 16px;
+  color: var(--text-main);
+  margin-bottom: 4px;
 }
 
 .reasoning-box p {
-  color: #b9e3fa;
+  color: var(--text-dim);
   font-style: italic;
-  margin: 0;
-}
-
-.info-section {
-  margin-bottom: 25px;
-}
-
-.info-section h3 {
-  color: #bdeafd;
-  margin-bottom: 15px;
-  font-size: 20px;
 }
 
 .info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
+  gap: 16px;
+  margin-bottom: 32px;
 }
 
 .info-item {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid rgba(189, 234, 253, 0.2);
+  background: var(--bg-card-hover);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
 }
 
 .info-label {
   display: block;
-  color: #b9e3fa;
-  font-size: 14px;
-  margin-bottom: 5px;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin-bottom: 4px;
 }
 
 .info-value {
   display: block;
-  color: #49eee7;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.recommendation-box {
-  background: rgba(33, 176, 219, 0.1);
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 25px;
-  border: 1px solid rgba(33, 176, 219, 0.3);
-}
-
-.recommendation-box h3 {
-  color: #bdeafd;
-  margin-top: 0;
-  margin-bottom: 15px;
-  font-size: 18px;
-}
-
-.recommendation-box p {
-  color: #b9e3fa;
-  margin-bottom: 10px;
-}
-
-.recommendation-box ul {
-  margin: 0;
-  padding-left: 20px;
-}
-
-.recommendation-box li {
-  color: #b9e3fa;
-  margin-bottom: 8px;
-  line-height: 1.5;
-}
-
-.obligations-section {
-  margin-bottom: 25px;
-}
-
-.obligations-section h3 {
-  color: #bdeafd;
-  margin-bottom: 15px;
-  font-size: 20px;
-}
-
-.obligations-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  color: var(--accent-purple);
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .obligations-list li {
-  padding: 12px 12px 12px 35px;
-  margin-bottom: 10px;
-  background: rgba(33, 176, 219, 0.1);
-  border-radius: 6px;
-  color: #b9e3fa;
+  padding: 12px 12px 12px 30px;
+  margin-bottom: 8px;
+  background: transparent;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-main);
   position: relative;
 }
 
 .obligations-list li:before {
   content: "✓";
   position: absolute;
-  left: 12px;
-  color: #21b0db;
+  left: 0;
+  color: var(--accent-green);
   font-weight: bold;
-}
-
-.warning-box {
-  background: rgba(244, 67, 54, 0.1);
-  border: 2px solid rgba(244, 67, 54, 0.3);
-  border-radius: 10px;
-  padding: 20px;
-  margin-bottom: 25px;
-}
-
-.warning-box h4 {
-  color: #f44336;
-  margin-top: 0;
-  margin-bottom: 15px;
-}
-
-.warning-box ul {
-  margin: 0;
-  padding-left: 20px;
-}
-
-.warning-box li {
-  color: #b9e3fa;
-  margin-bottom: 8px;
-}
-
-.next-steps-section {
-  margin-bottom: 25px;
-}
-
-.next-steps-section h3 {
-  color: #bdeafd;
-  margin-bottom: 15px;
-  font-size: 20px;
-}
-
-.next-steps-section ol {
-  margin: 0;
-  padding-left: 25px;
-}
-
-.next-steps-section li {
-  color: #b9e3fa;
-  margin-bottom: 10px;
-  line-height: 1.5;
-  padding-left: 5px;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 15px;
-  margin-top: 25px;
-}
-
-.back-btn,
-.restart-btn,
-.continue-btn {
-  padding: 14px 30px;
-  font-size: 16px;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: inherit;
-}
-
-.back-btn {
-  background: linear-gradient(135deg, #444 0%, #666 100%);
-  color: white;
-  min-width: 120px;
-}
-
-.back-btn:hover {
-  background: linear-gradient(135deg, #555 0%, #777 100%);
-  transform: translateY(-2px);
-}
-
-.restart-btn {
-  background: linear-gradient(135deg, #607d8b 0%, #455a64 100%);
-  color: white;
-  flex-grow: 1;
-}
-
-.restart-btn:hover {
-  background: linear-gradient(135deg, #546e7a 0%, #37474f 100%);
-  transform: translateY(-2px);
-}
-
-.continue-btn {
-  background: linear-gradient(135deg, #21b0db 0%, #1fa7e9 100%);
-  color: white;
-  flex-grow: 1;
-}
-
-.continue-btn:hover {
-  background: linear-gradient(135deg, #1fa7e9 0%, #1890c8 100%);
-  transform: translateY(-2px);
-}
-
-/* =========================================
-   NOVÉ STYLY PRO GAP ANALÝZU A SEZNAM OPATŘENÍ
-   ========================================= */
-
-.gap-analysis-section {
-  margin-bottom: 30px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 12px;
-  border: 1px solid rgba(189, 234, 253, 0.1);
-}
-
-.gap-analysis-section h3 {
-  color: #bdeafd;
-  margin-top: 0;
-  margin-bottom: 15px;
-  font-size: 20px;
-}
-
-.gap-score-container {
-  margin-bottom: 20px;
-}
-
-.gap-score {
-  font-size: 18px;
-  font-weight: 600;
-  padding: 8px 16px;
-  border-radius: 20px;
-  display: inline-block;
-}
-
-.gap-score.good {
-  background-color: rgba(76, 175, 80, 0.2);
-  color: #81c784;
-  border: 1px solid #4caf50;
-}
-
-.gap-score.bad {
-  background-color: rgba(244, 67, 54, 0.2);
-  color: #e57373;
-  border: 1px solid #f44336;
-}
-
-/* Kontejner pro seznam splněných opatření */
-.security-list-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px; /* Mezera mezi řádky */
-  text-align: left;
-}
-
-/* Jeden řádek seznamu */
-.security-list-item {
-  display: flex;
-  align-items: flex-start; /* Zarovná fajfku nahoru */
-  line-height: 1.5;
-  color: #b9e3fa;
-}
-
-/* Zelená fajfka */
-.check-icon-green {
-  color: #4caf50;
-  font-weight: bold;
-  font-size: 1.2rem;
-  margin-right: 12px; /* Odsazení fajfky od textu */
-  flex-shrink: 0;
-}
-
-/* Textová část */
-.security-item-text {
-  flex: 1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 6px;
-}
-
-/* Hlavní název opatření */
-.main-label {
-  font-weight: 500;
-  color: #e1f5fe;
-}
-
-/* Odkaz na paragraf */
-.article-label {
-  color: #81d4fa;
-  font-size: 0.9em;
-  opacity: 0.8;
 }

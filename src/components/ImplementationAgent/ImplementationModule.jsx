@@ -4,7 +4,7 @@ import RiskAndAssetStep from './RiskAndAssetStep';
 import SecurityMeasuresTable from './SecurityMeasuresTable';
 import './ImplementationModule.css';
 
-export default function ImplementationModule() {
+export default function ImplementationModule(props) {
     const [currentStep, setCurrentStep] = useState(0); // 0 = Internal Landing
     const [moduleData, setModuleData] = useState({
         legalContext: {},
@@ -149,6 +149,20 @@ export default function ImplementationModule() {
                         <div className="step-number">4</div> Report
                     </div>
                 </nav>
+                <div style={{ marginTop: 'auto', paddingTop: '2rem', borderTop: '1px solid var(--im-border)' }}>
+                    <div
+                        className="step-item"
+                        onClick={props.onExit}
+                        style={{ marginBottom: '1rem', color: '#ff453a' }}
+                    >
+                        <div className="step-number" style={{ background: 'rgba(255, 69, 58, 0.1)', color: '#ff453a' }}>✕</div>
+                        Ukončit
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'rgba(235, 235, 245, 0.3)' }}>
+                        Verze 2.1 (Apple) <br />
+                        Vyhláška 410/2025 Sb.
+                    </div>
+                </div>
             </aside>
 
             <main className="main-content">

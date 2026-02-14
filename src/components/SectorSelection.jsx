@@ -63,14 +63,14 @@ export default function SectorSelection({ onSectorSelect, onBack }) {
   };
 
   return (
-    <div className="fancy-gradient">
+    <div className="module-card animate-slide-up">
       <h2>Vyberte sektor</h2>
       <p className="services-description">
         Vyberte sektor, ve kterém vaše firma poskytuje služby podle směrnice NIS2.
       </p>
 
-      <select 
-        value={selected} 
+      <select
+        value={selected}
         onChange={handleSelect}
         className="sector-select"
       >
