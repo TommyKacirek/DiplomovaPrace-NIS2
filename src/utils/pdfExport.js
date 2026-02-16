@@ -576,6 +576,70 @@ const ReportDocument = ({ data }) => {
 // 7. AGENT REPORT DOCUMENT
 // ==========================================
 
+// --- MANAGEMENT SIGN-OFF PAGE ---
+const ManagementSignOffPage = ({ data }) => {
+  const { riskData } = data;
+  const person = riskData || {}; // ObligatedPersonStep saves data here
+
+  return (
+    <Page size="A4" style={styles.page}>
+      <View style={{ height: '100%', justifyContent: 'center', alignItems: 'center', backgroundColor: '#000000', color: '#FFFFFF' }}>
+
+        {/* Border Frame */}
+        <View style={{ position: 'absolute', top: 20, left: 20, right: 20, bottom: 20, border: '1px solid #333333' }} />
+
+        {/* Content */}
+        <View style={{ width: '80%', alignItems: 'center' }}>
+
+          <Text style={{ fontSize: 10, letterSpacing: 2, color: '#888888', marginBottom: 20 }}>
+            AUDIT KYBERNETICKÉ BEZPEČNOSTI
+          </Text>
+
+          <Text style={{ fontSize: 24, fontWeight: 700, marginBottom: 10, color: '#FFFFFF' }}>
+            MANAGEMENT SIGN-OFF
+          </Text>
+
+          <Text style={{ fontSize: 10, color: '#666666', marginBottom: 40, textAlign: 'center' }}>
+            § 3, § 4(f), § 6 vyhlášky 410/2025 Sb.
+          </Text>
+
+          <View style={{ width: '100%', padding: 30, backgroundColor: '#0A0A0A', border: '1px solid #222222', borderRadius: 8, alignItems: 'center' }}>
+
+            <Text style={{ fontSize: 9, color: '#666666', letterSpacing: 1, marginBottom: 5 }}>
+              ODPOVĚDNÁ OSOBA
+            </Text>
+            <Text style={{ fontSize: 18, color: '#FFFFFF', marginBottom: 5 }}>
+              {person.name || "Nezadáno"}
+            </Text>
+            <Text style={{ fontSize: 12, color: '#BF5AF2', marginBottom: 30 }}>
+              {person.role || "Role neurčena"}
+            </Text>
+
+            <View style={{ width: '100%', height: 1, backgroundColor: '#222222', marginBottom: 30 }} />
+
+            <Text style={{ fontSize: 9, color: '#666666', letterSpacing: 1, marginBottom: 5 }}>
+              DIGITÁLNÍ PEČEŤ (SHA-256)
+            </Text>
+            <Text style={{ fontSize: 8, color: '#32D74B', fontFamily: 'Courier', textAlign: 'center', marginBottom: 10 }}>
+              {person.hash || "NOT_SIGNED"}
+            </Text>
+            <Text style={{ fontSize: 8, color: '#444444' }}>
+              Timestamp: {person.timestamp ? new Date(person.timestamp).toLocaleString('cs-CZ') : "N/A"}
+            </Text>
+
+          </View>
+
+          <Text style={{ fontSize: 9, color: '#444444', marginTop: 40, textAlign: 'center', maxWidth: 400, lineHeight: 1.5 }}>
+            Tento dokument potvrzuje, že výše uvedená osoba převzala odpovědnost za zavedení a provádění bezpečnostních opatření v souladu s požadavky směrnice NIS2 a zákona o kybernetické bezpečnosti.
+          </Text>
+
+        </View>
+      </View>
+    </Page>
+  );
+};
+
+
 const AgentReportDocument = ({ data }) => {
   const { legalContext, riskData, finalMeasures } = data;
   const today = new Date().toLocaleDateString('cs-CZ');
@@ -588,6 +652,10 @@ const AgentReportDocument = ({ data }) => {
 
   return (
     <Document>
+      {/* 1. COVER PAGE - MANAGEMENT SIGN-OFF */}
+      <ManagementSignOffPage data={data} />
+
+      {/* 2. MAIN REPORT */}
       <Page size="A4" orientation="landscape" style={styles.page}>
 
         {/* Header Strip */}
@@ -608,8 +676,8 @@ const AgentReportDocument = ({ data }) => {
         {/* Intro Text */}
         <View style={{ marginHorizontal: 40, marginBottom: 20 }}>
           <Text style={{ fontSize: 10, color: colors.textSec }}>
-            Povinná osoba: <Text style={{ color: colors.black, fontWeight: 700 }}>{legalContext?.serviceDefinition || "Nezadáno"}</Text> |
-            Počet aktiv: <Text style={{ color: colors.black }}>{riskData?.assets?.length || 0}</Text>
+            Povinná osoba: <Text style={{ color: colors.black, fontWeight: 700 }}>{riskData?.name || "Nezadáno"}</Text> |
+            Role: <Text style={{ color: colors.black }}>{riskData?.role || "-"}</Text>
           </Text>
         </View>
 
@@ -704,10 +772,10 @@ const AgentReportDocument = ({ data }) => {
             Obsah dokumentu je chráněn kontrolním součtem (Integrity Check).
           </Text>
           <Text style={{ fontSize: 8, color: colors.brand, fontFamily: 'Courier' }}>
-            SHA-256 SIGNATURE: {hash}
+            DOC HASH: {hash}
           </Text>
           <Text style={styles.footerText}>
-            Vygenerováno systémem NIS2 Agent | Strana 1
+            Vygenerováno systémem NIS2 Agent | Strana {2}
           </Text>
         </View>
 

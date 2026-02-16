@@ -1,30 +1,83 @@
 import React, { useState } from 'react';
+import './IdentificationStep.css';
 
 /**
  * IdentificationStep
  * 
- * Redesigned Step 1: Identification & Scope
- * Features: High contrast, Clickable Cards, Sleek Forms
+ * Step 1: § 2 Vymezení pojmů (Decree 410/2025 Sb.)
+ * 
+ * Formal confirmation of definitions and CIA triad.
+ * Users must assign roles and sign off on understanding security principles.
  */
 export default function IdentificationStep({ onComplete }) {
-  const [statusConfirmed, setStatusConfirmed] = useState(false);
-  const [serviceDefinition, setServiceDefinition] = useState('');
-  const [managementDeclared, setManagementDeclared] = useState(false);
+  // State for § 2 Definitions (a, b, c, d)
+  const [definitions, setDefinitions] = useState({
+    user: {
+      id: 'a',
+      label: 'Uživatel',
+      text: 'Fyzická nebo právnická osoba anebo orgán veřejné moci, který využívá aktiva.',
+      assignee: '',
+      confirmed: false,
+      placeholder: 'Kdo tuto roli typicky zastává? (např. všichni zaměstnanci)'
+    },
+    privilegedUser: {
+      id: 'b',
+      label: 'Privilegovaný uživatel',
+      text: 'Uživatel nebo jiná osoba, jejíž činnost na technickém aktivu může mít významný dopad na bezpečnost regulované služby.',
+      assignee: '',
+      confirmed: false,
+      placeholder: 'Kdo má rozšířená práva? (např. vedoucí oddělení, garanti)'
+    },
+    administrator: {
+      id: 'c',
+      label: 'Administrátor',
+      text: 'Privilegovaný uživatel nebo osoba zajišťující správu, provoz, užívání, údržbu a bezpečnost technického aktiva.',
+      assignee: '',
+      confirmed: false,
+      placeholder: 'Kdo spravuje systémy? (např. IT oddělení, externí support)'
+    },
+    securityPolicy: {
+      id: 'd',
+      label: 'Bezpečnostní politika',
+      text: 'Soubor zásad a pravidel, která určují způsob zajištění ochrany aktiv.',
+      assignee: '',
+      confirmed: false,
+      placeholder: 'Kdo je garantem politiky? (např. CISO, jednatel)'
+    }
+  });
 
-  const isValid =
-    statusConfirmed &&
-    serviceDefinition.trim().length > 0 &&
-    managementDeclared;
+  // State for CIA Triad Confirmation
+  const [ciaSignature, setCiaSignature] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (isValid && onComplete) {
+  // --- Handlers ---
+  const handleDefChange = (key, field, value) => {
+    setDefinitions(prev => ({
+      ...prev,
+      [key]: { ...prev[key], [field]: value }
+    }));
+  };
+
+  const isStepValid = () => {
+    // 1. All definitions must be confirmed and have an assignee
+    const allDefsValid = Object.values(definitions).every(d => d.confirmed && d.assignee.trim().length > 0);
+
+    // 2. CIA Signature must be present
+    const ciaValid = ciaSignature.trim().length > 0;
+
+    return allDefsValid && ciaValid;
+  };
+
+  const handleSubmit = () => {
+    if (isStepValid() && onComplete) {
       onComplete({
         step: 1,
         data: {
-          statusConfirmed,
-          serviceDefinition,
-          managementDeclared,
+          definitions,
+          ciaTriad: {
+            signature: ciaSignature,
+            confirmed: true,
+            timestamp: new Date().toISOString()
+          },
           timestamp: new Date().toISOString()
         }
       });
@@ -35,83 +88,95 @@ export default function IdentificationStep({ onComplete }) {
     <div className="step-container fade-in">
       <div className="step-header">
         <span className="step-badge">Krok 1</span>
-        <h2>Identifikace a rozsah</h2>
-        <p className="step-legal-ref">§ 1 vyhlášky 410/2025 Sb.</p>
+        <h2>§ 2 Vymezení pojmů</h2>
+        <p className="step-legal-ref">vyhláška 410/2025 Sb.</p>
+        <p className="step-description">
+          Pro správnou implementaci je nutné pochopit a určit základní role a pojmy.
+        </p>
       </div>
 
-      <form className="premium-form" onSubmit={handleSubmit}>
+      {/* --- Definitions Section --- */}
+      <div className="definitions-grid">
+        {Object.entries(definitions).map(([key, def]) => (
+          <div key={key} className={`definition-card ${def.confirmed ? 'confirmed' : ''}`}>
+            <div className="def-header">
+              <span className="def-letter">{def.id})</span>
+              <h3>{def.label}</h3>
+            </div>
+            <p className="def-text">{def.text}</p>
 
-        {/* 1. Status Confirmation - Clickable Card */}
-        <div
-          className={`card-checkbox ${statusConfirmed ? 'checked' : ''}`}
-          onClick={() => setStatusConfirmed(!statusConfirmed)}
+            <div className="def-inputs">
+              <div className="input-group">
+                <label>Přiřazení role / Odpovědnost</label>
+                <input
+                  type="text"
+                  className="input-sleek"
+                  placeholder={def.placeholder}
+                  value={def.assignee}
+                  onChange={(e) => handleDefChange(key, 'assignee', e.target.value)}
+                />
+              </div>
+
+              <label className="checkbox-container">
+                <input
+                  type="checkbox"
+                  checked={def.confirmed}
+                  onChange={(e) => handleDefChange(key, 'confirmed', e.target.checked)}
+                />
+                <span className="checkmark"></span>
+                Rozumím této definici
+              </label>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* --- CIA Triad Section --- */}
+      <div className="cia-section">
+        <h3>Potvrzení principů bezpečnosti (CIA)</h3>
+        <div className="cia-explanation">
+          <div className="cia-item" title="Zajištění, aby informace byly přístupné pouze oprávněným osobám.">
+            <strong>C</strong>onfidentiality (Důvěrnost)
+            <span className="info-icon">i</span>
+          </div>
+          <div className="cia-item" title="Zajištění správnosti a úplnosti informací a metod jejich zpracování.">
+            <strong>I</strong>ntegrity (Integrita)
+            <span className="info-icon">i</span>
+          </div>
+          <div className="cia-item" title="Zajištění, aby oprávnění uživatelé měli k informacím přístup, když je potřebují.">
+            <strong>A</strong>vailability (Dostupnost)
+            <span className="info-icon">i</span>
+          </div>
+        </div>
+        <p className="cia-text">
+          Svým podpisem stvrzuji, že chápu význam těchto tří pilířů informační bezpečnosti a budu je při implementaci respektovat.
+        </p>
+        <input
+          type="text"
+          className="input-sleek signature-input"
+          placeholder="Podpis (Jméno a Příjmení)"
+          value={ciaSignature}
+          onChange={(e) => setCiaSignature(e.target.value)}
+        />
+      </div>
+
+      {/* --- Action Bar --- */}
+      <div className="form-actions-bar">
+        <div className="validation-status">
+          {isStepValid() ? (
+            <span className="status-valid">✓ Vše vyplněno</span>
+          ) : (
+            <span className="status-invalid">Vyplňte prosím všechna pole a potvrďte definice.</span>
+          )}
+        </div>
+        <button
+          className="action-button primary"
+          onClick={handleSubmit}
+          disabled={!isStepValid()}
         >
-          <div className="card-indicator">
-            {statusConfirmed ? '✓' : ''}
-          </div>
-          <div className="card-content">
-            <h3>Potvrzení statusu</h3>
-            <p>
-              Prohlašuji, že naše organizace je <strong>„povinnou osobou“</strong>
-              ve smyslu zákona o kybernetické bezpečnosti.
-            </p>
-          </div>
-        </div>
-
-        {/* 2. Regulated Service - Clean Input */}
-        <div className="form-group-sleek">
-          <label htmlFor="regulated-service">
-            Definice regulované služby
-          </label>
-          <input
-            id="regulated-service"
-            type="text"
-            value={serviceDefinition}
-            onChange={(e) => setServiceDefinition(e.target.value)}
-            placeholder="Např. Výroba elektřiny, Poskytování cloudových služeb..."
-            className="input-sleek"
-          />
-          <p className="input-hint">
-            Uveďte konkrétní službu, která spadá pod regulaci.
-          </p>
-        </div>
-
-        {/* 3. Management Declaration - Clickable Card */}
-        <div
-          className={`card-checkbox ${managementDeclared ? 'checked' : ''}`}
-          onClick={() => setManagementDeclared(!managementDeclared)}
-        >
-          <div className="card-indicator">
-            {managementDeclared ? '✓' : ''}
-          </div>
-          <div className="card-content">
-            <h3>Deklarace managementu</h3>
-            <p>
-              Beru na vědomí, že <strong>vyhláška č. 410/2025 Sb.</strong> upravuje obsah
-              bezpečnostních opatření a kritéria pro dopady incidentů.
-            </p>
-          </div>
-        </div>
-
-        {/* Action Bar */}
-        <div className="form-actions-bar">
-          <div className="validation-status">
-            {isValid ? (
-              <span className="status-valid">✓ Vše připraveno</span>
-            ) : (
-              <span className="status-invalid">Vyplňte všechna pole</span>
-            )}
-          </div>
-          <button
-            type="submit"
-            className="action-button primary"
-            disabled={!isValid}
-          >
-            Potvrdit a pokračovat
-          </button>
-        </div>
-
-      </form>
+          Potvrdit a pokračovat
+        </button>
+      </div>
     </div>
   );
 }

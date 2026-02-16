@@ -1,342 +1,217 @@
 import React, { useState } from 'react';
+import './IdentificationStep.css'; // Reusing the premium styles from Step 1
 
 /**
- * RiskAndAssetStep
+ * RiskAndAssetStep (Refactored to § 3 Minimum Security Manager)
  * 
- * Step 4: Risk Management Context (§ 3 Decree 410/2025 Sb.)
+ * Step 2: Systém zajišťování minimální kybernetické bezpečnosti (§ 3 Decree 410/2025 Sb.)
  * 
- * Section 1: Asset Evidence (Evidence aktiv)
- * - Management of assets with required fields: Name, Type, Criticality, Recovery Priority (§ 4(f) & § 6).
- * 
- * Section 2: Proportionality Questionnaire (Dotazník přiměřenosti)
- * - Business logic questions to determine applicable security measures and proportionality.
+ * Focus:
+ * 1. Identification of the "Responsible Person" (Povinná osoba).
+ * 2. Declaration of proportionality (§ 3a).
+ * 3. Commitment to mandatory measures (§ 3b, § 4, § 5, § 6, § 10).
  */
 export default function RiskAndAssetStep({ onComplete }) {
-    // --- Section 1: Asset Evidence State ---
-    const [assets, setAssets] = useState([]);
-    const [newAsset, setNewAsset] = useState({
+    // --- State: Responsible Person ---
+    const [responsiblePerson, setResponsiblePerson] = useState({
         name: '',
-        type: 'Primární',
-        confidentiality: 'Nízká',
-        integrity: 'Nízká',
-        availability: 'Nízká',
-        recoveryPriority: '4'
+        role: '',
+        date: '' // Allow empty start to let user pick freely
     });
 
-    // --- Section 2: Smart Logic State ---
-    const [smartLogic, setSmartLogic] = useState({
-        hasHighValueIT: false,        // > 300k CZK
-        hasHealthOrSafetyImpact: false, // Impact on health/safety
-        hasLegacySystems: false       // Use of unsupported tech
-    });
-
-    // --- Handlers: Asset Evidence ---
-    const handleAddAsset = () => {
-        if (!newAsset.name.trim()) return;
-
-        // Calculate derived criticality (High/Critical if any CIA is High/Critical)
-        const levels = { 'Nízká': 1, 'Střední': 2, 'Vysoká': 3, 'Kritická': 4 };
-        const maxLevel = Math.max(
-            levels[newAsset.confidentiality],
-            levels[newAsset.integrity],
-            levels[newAsset.availability]
-        );
-        const derivedCriticality = Object.keys(levels).find(key => levels[key] === maxLevel);
-
-        const assetEntry = {
-            id: Date.now(),
-            ...newAsset,
-            criticality: derivedCriticality
-        };
-
-        setAssets([...assets, assetEntry]);
-        // Reset form to defaults
-        setNewAsset({
-            name: '',
-            type: 'Primární',
-            confidentiality: 'Nízká',
-            integrity: 'Nízká',
-            availability: 'Nízká',
-            recoveryPriority: '4'
-        });
-    };
-
-    const handleRemoveAsset = (id) => {
-        setAssets(assets.filter(a => a.id !== id));
-    };
-
-    const handleAssetChange = (field, value) => {
-        setNewAsset(prev => ({ ...prev, [field]: value }));
-    };
-
-    const handleKeyPress = (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            handleAddAsset();
+    // --- State: Declarations ---
+    const [declarations, setDeclarations] = useState({
+        minSecurity: {
+            id: '§3',
+            label: 'Systém minimální kybernetické bezpečnosti',
+            text: 'Zavádím a provádím bezpečnostní opatření, která jsou přiměřená bezpečnostním potřebám (§ 3 odst. 1 písm. a).',
+            checked: false
+        },
+        governance: {
+            id: '§4',
+            label: 'Požadavky na vrcholné vedení',
+            text: 'Beru na vědomí odpovědnost vedení za schvalování a kontrolu bezpečnostních opatření.',
+            checked: false
+        },
+        hrSecurity: {
+            id: '§5',
+            label: 'Bezpečnost lidských zdrojů',
+            text: 'Zajistím uplatňování bezpečnostních požadavků v rámci pracovněprávních vztahů.',
+            checked: false
+        },
+        bcm: {
+            id: '§6',
+            label: 'Řízení kontinuity činností',
+            text: 'Zavedu plány pro zvládání přerušení provozu a obnovu klíčových služeb.',
+            checked: false
+        },
+        incidents: {
+            id: '§10',
+            label: 'Řešení incidentů',
+            text: 'Zajistím proces detekce, hlášení a zvládání kybernetických bezpečnostních incidentů.',
+            checked: false
         }
+    });
+
+    const [signature, setSignature] = useState('');
+
+    // --- Handlers ---
+    const handlePersonChange = (field, value) => {
+        setResponsiblePerson(prev => ({ ...prev, [field]: value }));
     };
 
-    // --- Handlers: Smart Logic ---
-    const handleToggle = (key) => {
-        setSmartLogic(prev => ({
+    const handleDeclarationToggle = (key) => {
+        setDeclarations(prev => ({
             ...prev,
-            [key]: !prev[key]
+            [key]: { ...prev[key], checked: !prev[key].checked }
         }));
     };
 
-    // --- Completion Handler ---
-    const handleSaveAndContinue = () => {
-        if (onComplete) {
+    const isStepValid = () => {
+        const isPersonValid = responsiblePerson.name.trim() && responsiblePerson.role.trim() && responsiblePerson.date;
+        const areDeclarationsValid = Object.values(declarations).every(d => d.checked);
+        const isSignatureValid = signature.trim().length > 0;
+
+        return isPersonValid && areDeclarationsValid && isSignatureValid;
+    };
+
+    const handleSubmit = () => {
+        if (isStepValid() && onComplete) {
             onComplete({
-                step: 4,
+                step: 2, // Maps to 'riskData' key in parent, keeping structure but changing semantic content
                 data: {
-                    assets: assets,
-                    smartLogic: smartLogic
+                    responsiblePerson,
+                    declarations,
+                    signature,
+                    timestamp: new Date().toISOString()
                 }
             });
         }
     };
 
     return (
-        <div className="step-container fade-in risk-asset-container">
+        <div className="step-container fade-in">
             <div className="step-header">
-                <span className="step-badge">Krok 4</span>
-                <h2>Kontext řízení rizik</h2>
-                <p className="step-legal-ref">§ 3, § 4(f), § 6 vyhlášky 410/2025 Sb.</p>
+                <span className="step-badge">Krok 2</span>
+                <h2>Systém zajišťování minimální KB</h2>
+                <p className="step-legal-ref">§ 3 vyhlášky 410/2025 Sb.</p>
                 <p className="step-description">
-                    Identifikujte svá aktiva a určete jejich kritikalitu a priority obnovy.
-                    Odpovězte na otázky přiměřenosti pro nastavení bezpečnostních opatření.
+                    Identifikace povinné osoby a potvrzení závazku k zavedení minimálních bezpečnostních opatření.
                 </p>
             </div>
 
-            {/* --- Section 1: Asset Evidence --- */}
-            <section className="step-section">
-                <h3>1. Evidence aktiv</h3>
-                <p className="section-desc">
-                    Zadejte klíčová aktiva. Priorita obnovy určuje pořadí při řešení incidentů (1 = nejvyšší).
+            {/* --- Section 1: Responsible Person --- */}
+            <div className="definition-card" style={{ marginBottom: '3rem' }}>
+                <div className="def-header">
+                    <span className="def-letter">Osoba</span>
+                    <h3>Odpovědnost za kybernetickou bezpečnost</h3>
+                </div>
+                <p className="def-text">
+                    Určete osobu odpovědnou za zajišťování kybernetické bezpečnosti v organizaci (např. statutární orgán nebo jím pověřená osoba).
                 </p>
 
-                <div className="asset-form form-group-sleek">
-                    <div className="form-row">
-                        <div className="form-col">
-                            <label>Název aktiva</label>
+                <div className="def-inputs">
+                    <div className="input-group">
+                        <label className="input-label">Jméno a Příjmení</label>
+                        <input
+                            type="text"
+                            placeholder="Např. Ing. Jan Novák"
+                            value={responsiblePerson.name}
+                            onChange={(e) => handlePersonChange('name', e.target.value)}
+                        />
+                    </div>
+                    <div className="input-group">
+                        <label className="input-label">Funkce / Role</label>
+                        <input
+                            type="text"
+                            placeholder="Např. Jednatel, Bezpečnostní ředitel (CISO)"
+                            value={responsiblePerson.role}
+                            onChange={(e) => handlePersonChange('role', e.target.value)}
+                        />
+                    </div>
+                    <div className="input-group">
+                        <label className="input-label">Datum pověření</label>
+                        <input
+                            type="date"
+                            style={{
+                                width: '100%',
+                                background: 'rgba(0,0,0,0.3)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                padding: '1rem',
+                                color: 'white',
+                                borderRadius: '8px',
+                                colorScheme: 'dark' // Ensure calendar picker is dark
+                            }}
+                            value={responsiblePerson.date}
+                            onChange={(e) => handlePersonChange('date', e.target.value)}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* --- Section 2: Declarations Grid --- */}
+            <h3 style={{ marginBottom: '1.5rem', marginLeft: '0.5rem' }}>Rozsah bezpečnostních opatření</h3>
+            <div className="definitions-grid">
+                {Object.entries(declarations).map(([key, item]) => (
+                    <div
+                        key={key}
+                        className={`definition-card ${item.checked ? 'confirmed' : ''}`}
+                        onClick={() => handleDeclarationToggle(key)}
+                        style={{ cursor: 'pointer' }}
+                    >
+                        <div className="def-header">
+                            <span className="def-letter">{item.id}</span>
+                            <h3>{item.label}</h3>
+                        </div>
+                        <p className="def-text" style={{ marginBottom: '1rem', borderBottom: 'none' }}>
+                            {item.text}
+                        </p>
+
+                        <div className="checkbox-container">
                             <input
-                                type="text"
-                                className="input-sleek"
-                                placeholder="Např. DB Zákazníků, ERP, Server..."
-                                value={newAsset.name}
-                                onChange={(e) => handleAssetChange('name', e.target.value)}
-                                onKeyDown={handleKeyPress}
+                                type="checkbox"
+                                checked={item.checked}
+                                readOnly // Handled by card click
                             />
-                        </div>
-
-                        <div className="form-col small">
-                            <label>Typ aktiva</label>
-                            <select
-                                className="input-sleek"
-                                value={newAsset.type}
-                                onChange={(e) => handleAssetChange('type', e.target.value)}
-                            >
-                                <option value="Primární">Primární</option>
-                                <option value="Podpůrné">Podpůrné</option>
-                            </select>
-                        </div>
-
-                        <div className="form-col small">
-                            <label>Důvěrnost (C)</label>
-                            <select
-                                className="input-sleek"
-                                value={newAsset.confidentiality}
-                                onChange={(e) => handleAssetChange('confidentiality', e.target.value)}
-                                title="Požadavek na utajení dat"
-                            >
-                                <option value="Nízká">Nízká</option>
-                                <option value="Střední">Střední</option>
-                                <option value="Vysoká">Vysoká</option>
-                                <option value="Kritická">Kritická</option>
-                            </select>
-                        </div>
-
-                        <div className="form-col small">
-                            <label>Integrita (I)</label>
-                            <select
-                                className="input-sleek"
-                                value={newAsset.integrity}
-                                onChange={(e) => handleAssetChange('integrity', e.target.value)}
-                                title="Požadavek na správnost a úplnost"
-                            >
-                                <option value="Nízká">Nízká</option>
-                                <option value="Střední">Střední</option>
-                                <option value="Vysoká">Vysoká</option>
-                                <option value="Kritická">Kritická</option>
-                            </select>
-                        </div>
-
-                        <div className="form-col small">
-                            <label>Dostupnost (A)</label>
-                            <select
-                                className="input-sleek"
-                                value={newAsset.availability}
-                                onChange={(e) => handleAssetChange('availability', e.target.value)}
-                                title="Požadavek na přístupnost"
-                            >
-                                <option value="Nízká">Nízká</option>
-                                <option value="Střední">Střední</option>
-                                <option value="Vysoká">Vysoká</option>
-                                <option value="Kritická">Kritická</option>
-                            </select>
-                        </div>
-
-                        <div className="form-col small">
-                            <label>Priorita obnovy</label>
-                            <select
-                                className="input-sleek"
-                                value={newAsset.recoveryPriority}
-                                onChange={(e) => handleAssetChange('recoveryPriority', e.target.value)}
-                                title="1 = Nejvyšší priorita (obnovit ihned)"
-                            >
-                                <option value="1">1 - Nejvyšší</option>
-                                <option value="2">2 - Vysoká</option>
-                                <option value="3">3 - Střední</option>
-                                <option value="4">4 - Nízká</option>
-                            </select>
-                        </div>
-
-                        <div className="form-col action">
-                            <button
-                                className="action-button primary small"
-                                onClick={handleAddAsset}
-                                disabled={!newAsset.name.trim()}
-                            >
-                                Přidat
-                            </button>
+                            <span className="checkmark"></span>
+                            <span className="checkbox-text">
+                                {item.checked ? 'Potvrzeno' : 'Beru na vědomí a zavádím'}
+                            </span>
                         </div>
                     </div>
-                </div>
+                ))}
+            </div>
 
-                {assets.length > 0 ? (
-                    <table className="asset-table">
-                        <thead>
-                            <tr>
-                                <th>Název</th>
-                                <th>Typ</th>
-                                <th>Kritikalita</th>
-                                <th>Priorita Obnovy</th>
-                                <th>Akce</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {assets.map(asset => (
-                                <tr key={asset.id}>
-                                    <td>{asset.name}</td>
-                                    <td>
-                                        <span className={`badge-type ${asset.type === 'Primární' ? 'primary' : 'secondary'}`}>
-                                            {asset.type}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span className={`badge-crit crit-${asset.criticality === 'Kritická' ? 4 :
-                                            asset.criticality === 'Vysoká' ? 3 :
-                                                asset.criticality === 'Střední' ? 2 : 1
-                                            }`}>
-                                            {asset.criticality}
-                                        </span>
-                                    </td>
-                                    <td style={{ textAlign: 'center' }}>
-                                        <strong>{asset.recoveryPriority}</strong>
-                                    </td>
-                                    <td>
-                                        <button
-                                            className="remove-btn"
-                                            onClick={() => handleRemoveAsset(asset.id)}
-                                        >
-                                            ×
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                ) : (
-                    <div className="empty-state-message">
-                        Zatím nebyla přidána žádná aktiva.
-                    </div>
-                )}
-            </section>
-
-            {/* --- Section 2: Proportionality Questionnaire --- */}
-            <section className="step-section">
-                <h3>2. Kalkulačka přiměřenosti (Smart Logic)</h3>
-                <p className="section-desc">
-                    Odpovězte na otázky pro určení rozsahu bezpečnostních opatření.
+            {/* --- Section 3: Signature --- */}
+            <div className="cia-section">
+                <h3>Digitální stvrzení odpovědnosti</h3>
+                <p className="cia-text">
+                    Svým podpisem stvrzuji, že jsem se seznámil(a) s požadavky vyhlášky č. 410/2025 Sb. a přebírám odpovědnost za jejich zavedení v naší organizaci.
                 </p>
+                <input
+                    type="text"
+                    className="signature-input"
+                    placeholder="Podepsat (Jméno a Příjmení)"
+                    value={signature}
+                    onChange={(e) => setSignature(e.target.value)}
+                />
+            </div>
 
-                <div className="smart-logic-card">
-                    {/* Question 1 */}
-                    <div className="logic-row">
-                        <div className="logic-info">
-                            <h4>Přesahuje hodnota vašeho IT vybavení 300 000 Kč?</h4>
-                            <p>Pokud NE, aplikuje se princip přiměřenosti pro menší infrastruktury.</p>
-                        </div>
-                        <div className="logic-toggle">
-                            <label className="toggle-switch">
-                                <input
-                                    type="checkbox"
-                                    checked={smartLogic.hasHighValueIT}
-                                    onChange={() => handleToggle('hasHighValueIT')}
-                                />
-                                <span className="slider round"></span>
-                            </label>
-                        </div>
-                    </div>
-
-                    {/* Question 2 */}
-                    <div className="logic-row">
-                        <div className="logic-info">
-                            <h4>Má výpadek služby přímý dopad na zdraví osob nebo veřejnou bezpečnost?</h4>
-                            <p>Pokud ANO, zvyšuje se základní úroveň požadované bezpečnosti (Recovery Priority 1).</p>
-                        </div>
-                        <div className="logic-toggle">
-                            <label className="toggle-switch">
-                                <input
-                                    type="checkbox"
-                                    checked={smartLogic.hasHealthOrSafetyImpact}
-                                    onChange={() => handleToggle('hasHealthOrSafetyImpact')}
-                                />
-                                <span className="slider round"></span>
-                            </label>
-                        </div>
-                    </div>
-
-                    {/* Question 3 */}
-                    <div className="logic-row">
-                        <div className="logic-info">
-                            <h4>Využíváte pro práci zastaralé technologie (Legacy systémy)?</h4>
-                            <p>Systémy bez podpory výrobce vyžadují specifická kompenzační opatření (izolace sítě).</p>
-                        </div>
-                        <div className="logic-toggle">
-                            <label className="toggle-switch">
-                                <input
-                                    type="checkbox"
-                                    checked={smartLogic.hasLegacySystems}
-                                    onChange={() => handleToggle('hasLegacySystems')}
-                                />
-                                <span className="slider round"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
+            {/* --- Action Bar --- */}
             <div className="form-actions-bar">
                 <div className="validation-status">
-                    {assets.length === 0 && <span className="status-warning">Doporučení: Přidejte alespoň jedno klíčové aktivum.</span>}
+                    {isStepValid() ? (
+                        <span className="status-valid">✓ Připraveno k pokračování</span>
+                    ) : (
+                        <span className="status-invalid">Vyplňte odpovědnou osobu, potvrďte všechny body a podepište.</span>
+                    )}
                 </div>
                 <button
                     className="action-button primary"
-                    onClick={handleSaveAndContinue}
+                    onClick={handleSubmit}
+                    disabled={!isStepValid()}
                 >
-                    Uložit kontext a přejít na Opatření
+                    Uložit a přejít na Opatření
                 </button>
             </div>
         </div>

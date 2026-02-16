@@ -1,0 +1,15 @@
+{
+    "timestamp": "2024-01-01T12:00:00.000Z",
+    "legalContext": {
+        "isObligedEntity": true,
+        "serviceType": "Výroba elektřiny"
+    },
+    "riskData": {
+        "assets": [],
+        "smartLogic": {
+            "hasHealthOrSafetyImpact": true,
+            "hasLegacySystems": true
+        }
+    },
+    "finalMeasures": []
+}

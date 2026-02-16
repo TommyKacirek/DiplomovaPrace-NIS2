@@ -180,7 +180,15 @@ export default function SecurityMeasuresTable({ smartLogic, roles, onComplete })
                             const missingFields = !row.description || !row.responsibility;
 
                             return (
-                                <tr key={row.id} className={missingFields ? 'row-invalid' : ''}>
+                                <tr
+                                    key={row.id}
+                                    className={`${missingFields ? 'row-invalid' : ''}`}
+                                    style={row.recommendation?.includes('KRITICKÉ') ? {
+                                        boxShadow: 'inset 0 0 15px rgba(191, 90, 242, 0.2)',
+                                        backgroundColor: 'rgba(191, 90, 242, 0.05)',
+                                        borderLeft: '4px solid #bf5af2'
+                                    } : {}}
+                                >
                                     <td className="cell-id">
                                         {row.id}
                                         {isMandatory && <div style={{ color: '#ef4444', fontSize: '0.7rem' }}>(!)</div>}
@@ -198,7 +206,14 @@ export default function SecurityMeasuresTable({ smartLogic, roles, onComplete })
                                             borderRadius: '6px',
                                             borderLeft: isMandatory ? '3px solid #ef4444' : '3px solid #cbd5e1'
                                         }}>
-                                            {row.recommendation}
+                                            {row.recommendation.includes('KRITICKÉ') ? (
+                                                <span>
+                                                    <strong style={{ color: '#bf5af2' }}>KRITICKÉ</strong>
+                                                    {row.recommendation.replace('KRITICKÉ', '')}
+                                                </span>
+                                            ) : (
+                                                row.recommendation
+                                            )}
                                         </div>
                                         {isMandatory && isNezavedeno && (
                                             <div style={{ color: '#dc2626', fontSize: '0.8rem', fontWeight: 'bold', marginTop: '0.5rem' }}>

@@ -1,107 +1,384 @@
-.agent-module-container {
-  max-width: 800px;
+/* Identification Step Styles - Premium Redesign */
+
+.step-container {
+  max-width: 900px;
   margin: 0 auto;
+  padding-bottom: 6rem;
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Definitions Grid --- */
+.definitions-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.definition-card {
+  background: rgba(22, 22, 24, 0.6);
+  /* Translucent dark */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
   padding: 2rem;
-  background: var(--background-color, #ffffff);
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-.legal-declaration-form h2 {
-  margin-top: 0;
-  color: var(--primary-color, #2c3e50);
+.definition-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
 }
 
-.legal-declaration-form .subtitle {
-  color: #7f8c8d;
-  font-style: italic;
-  margin-bottom: 2rem;
+/* CONFIRMED STATE - Green Glow */
+.definition-card.confirmed {
+  background: rgba(50, 215, 75, 0.03);
+  border-color: #32d74b;
+  box-shadow: 0 0 30px rgba(50, 215, 75, 0.15), inset 0 0 20px rgba(50, 215, 75, 0.05);
 }
 
-.form-group {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  border: 1px solid #eee;
+.definition-card.confirmed::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #32d74b;
+  box-shadow: 0 0 10px #32d74b;
+}
+
+/* Header & Typography */
+.def-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.def-letter {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #bf5af2;
+  background: rgba(191, 90, 242, 0.15);
+  padding: 4px 10px;
   border-radius: 6px;
+  border: 1px solid rgba(191, 90, 242, 0.2);
+}
+
+.definition-card.confirmed .def-letter {
+  color: #32d74b;
+  background: rgba(50, 215, 75, 0.15);
+  border-color: rgba(50, 215, 75, 0.3);
+}
+
+.def-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #f5f5f7;
+}
+
+.def-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #a1a1a6;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 1.5rem;
+}
+
+/* --- Inputs --- */
+.def-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.input-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #86868b;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.def-inputs input[type="text"] {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  color: white;
+  font-size: 1rem;
   transition: all 0.2s ease;
 }
 
-.form-group:hover {
-  border-color: #ddd;
-  background-color: #fafafa;
+.def-inputs input[type="text"]:focus {
+  outline: none;
+  border-color: #bf5af2;
+  background: rgba(191, 90, 242, 0.05);
+  box-shadow: 0 0 0 4px rgba(191, 90, 242, 0.15);
 }
 
-.checkbox-group .checkbox-label {
+.definition-card.confirmed input[type="text"] {
+  border-color: rgba(50, 215, 75, 0.5);
+  background: rgba(50, 215, 75, 0.05);
+  color: #32d74b;
+}
+
+/* --- Checkbox Styling --- */
+.checkbox-container {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  gap: 1rem;
   cursor: pointer;
+  user-select: none;
+  padding: 0.5rem 0;
 }
 
-.checkbox-group input[type="checkbox"] {
-  margin-top: 0.25rem;
-  margin-right: 0.75rem;
+.checkbox-container input {
+  display: none;
+}
+
+.checkmark {
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.checkbox-container:hover .checkmark {
+  border-color: #bf5af2;
+  background: rgba(191, 90, 242, 0.1);
+}
+
+.checkbox-container input:checked~.checkmark {
+  background: #32d74b;
+  border-color: #32d74b;
+  box-shadow: 0 0 10px rgba(50, 215, 75, 0.4);
+}
+
+.checkbox-container .checkmark::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 4px;
+  width: 6px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.checkbox-container input:checked~.checkmark::after {
+  transform: rotate(45deg) scale(1);
+}
+
+.checkbox-text {
+  font-size: 0.95rem;
+  color: #d1d1d6;
+  transition: color 0.2s;
+}
+
+.checkbox-container input:checked~.checkbox-text {
+  color: #fff;
+  font-weight: 500;
+}
+
+
+/* --- CIA Section --- */
+.cia-section {
+  position: relative;
+  background: linear-gradient(135deg, rgba(28, 28, 30, 0.8) 0%, rgba(10, 10, 10, 0.9) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  text-align: center;
+  margin-top: 4rem;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+/* Decorative background elements for CIA */
+.cia-section::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  left: -50px;
+  width: 150px;
+  height: 150px;
+  background: #bf5af2;
+  filter: blur(80px);
+  opacity: 0.2;
+  border-radius: 50%;
+}
+
+.cia-section::after {
+  content: '';
+  position: absolute;
+  bottom: -50px;
+  right: -50px;
+  width: 150px;
+  height: 150px;
+  background: #32d74b;
+  filter: blur(80px);
+  opacity: 0.15;
+  border-radius: 50%;
+}
+
+.cia-explanation {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.signature-input {
+  font-family: 'Brush Script MT', 'Edu TAS Beginner', cursive;
+  font-size: 1.5rem !important;
+  text-align: center;
+  max-width: 350px !important;
+  margin: 0 auto;
+  border-bottom: 2px solid #bf5af2 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 0.5rem !important;
+  color: #fff !important;
+}
+
+.signature-input::placeholder {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.9rem;
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.signature-input:focus {
+  box-shadow: none !important;
+  border-color: #32d74b !important;
+}
+
+/* CIA Section Info Icon & Tooltip */
+.cia-item {
+  position: relative;
+  cursor: help;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-right: 0.8rem;
+  transition: all 0.2s;
+  font-family: 'SF Mono', monospace;
+  font-size: 1.1rem;
+  color: #f5f5f7;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cia-item strong {
+  color: #bf5af2;
+  font-weight: 800;
+  font-size: 1.3rem;
+}
+
+.cia-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.info-icon {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
   width: 18px;
   height: 18px;
-  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+  font-family: serif;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.6);
+  margin-left: 0.5rem;
 }
 
-.input-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.input-group label {
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #34495e;
-}
-
-.text-input {
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.text-input:focus {
-  border-color: var(--primary-color, #3498db);
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-}
-
-.form-actions {
-  margin-top: 2rem;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.submit-btn {
-  background-color: var(--success-color, #27ae60);
-  color: white;
-  border: none;
-  padding: 0.75rem 2rem;
-  font-size: 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  font-weight: 600;
-}
-
-.submit-btn:hover:not(:disabled) {
-  background-color: #219150;
-}
-
-.submit-btn:disabled {
-  background-color: #bdc3c7;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.validation-hint {
-  margin-top: 1rem;
+/* Custom Tooltip implementation (replacing default title for better style) */
+.cia-item::before {
+  content: attr(title);
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
   font-size: 0.85rem;
-  color: #e74c3c;
-  text-align: right;
+  width: 250px;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+}
+
+.cia-item::after {
+  content: '';
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid rgba(0, 0, 0, 0.9);
+  transform: translateX(-50%) translateY(10px);
+  opacity: 0;
+  transition: all 0.3s;
+}
+
+.cia-item:hover::before,
+.cia-item:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.cia-text {
+  font-size: 1rem;
+  color: #86868b;
+  max-width: 500px;
+  margin: 0 auto 2rem auto;
+  line-height: 1.5;
 }

@@ -3,7 +3,7 @@ import { generatePDFReport } from '../../utils/pdfExport';
 
 import React, { useState, useRef } from 'react';
 import IdentificationStep from './IdentificationStep';
-import RiskAndAssetStep from './RiskAndAssetStep';
+import ObligatedPersonStep from './ObligatedPersonStep';
 import SecurityMeasuresTable from './SecurityMeasuresTable';
 import './ImplementationModule.css';
 
@@ -166,7 +166,7 @@ export default function ImplementationModule(props) {
             case 1:
                 return <IdentificationStep onComplete={(res) => handleNextStep('legalContext', res)} />;
             case 2:
-                return <RiskAndAssetStep onComplete={(res) => handleNextStep('riskData', res)} />;
+                return <ObligatedPersonStep onComplete={(res) => handleNextStep('riskData', res)} />;
             case 3:
                 return (
                     <SecurityMeasuresTable
@@ -220,20 +220,47 @@ export default function ImplementationModule(props) {
                 <div className="sidebar-brand">
                     <span className="brand-icon">🛡️</span> NIS2 AGENT
                 </div>
+                {(() => {
+                    const timestamp = moduleData.finalMeasures?.timestamp || moduleData.timestamp;
+                    if (timestamp) {
+                        const auditDate = new Date(timestamp);
+                        const today = new Date();
+                        const diffInDays = (today - auditDate) / (1000 * 60 * 60 * 24);
+                        if (diffInDays > 365) {
+                            return (
+                                <div style={{
+                                    background: '#1c1c1e',
+                                    border: '1px solid #bf5af2',
+                                    borderRadius: '12px',
+                                    padding: '12px',
+                                    margin: '0 1rem 1.5rem 1rem',
+                                    fontSize: '0.8rem',
+                                    color: '#bf5af2',
+                                    lineHeight: '1.4',
+                                    fontWeight: '500',
+                                    boxShadow: '0 0 10px rgba(191, 90, 242, 0.1)'
+                                }}>
+                                    ⚠️ Dokumentace expirovala. Proveďte povinnou roční aktualizaci dle § 3 písm. b.
+                                </div>
+                            );
+                        }
+                    }
+                    return null;
+                })()}
                 <nav className="stepper-nav">
                     <div className={`step-item ${currentStep === 0 ? 'active' : ''}`} onClick={() => setCurrentStep(0)}>
                         <div className="step-icon-wrap"><Icons.Home /></div> Start
                     </div>
-                    <div className={`step-item ${currentStep === 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}>
+                    <div className={`step-item ${currentStep === 1 ? 'active' : ''}`} onClick={() => setCurrentStep(1)}>
                         <div className="step-icon-wrap"><Icons.Identity /></div> Identifikace
                     </div>
-                    <div className={`step-item ${currentStep === 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}>
-                        <div className="step-icon-wrap"><Icons.Shield /></div> Aktiva & Rizika
+                    <div className={`step-item ${currentStep === 2 ? 'active' : ''}`} onClick={() => setCurrentStep(2)}>
+                        <div className="step-icon-wrap"><Icons.Shield /></div> Osoba & Podpis
                     </div>
-                    <div className={`step-item ${currentStep === 3 ? 'active' : ''} ${currentStep > 3 ? 'completed' : ''}`}>
+                    <div className={`step-item ${currentStep === 3 ? 'active' : ''}`} onClick={() => setCurrentStep(3)}>
                         <div className="step-icon-wrap"><Icons.List /></div> Opatření
                     </div>
-                    <div className={`step-item ${currentStep === 4 ? 'active' : ''}`}>
+                    <div className={`step-item ${currentStep === 4 ? 'active' : ''}`} onClick={() => setCurrentStep(4)}>
                         <div className="step-icon-wrap"><Icons.File /></div> Report
                     </div>
                 </nav>
