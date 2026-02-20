@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import FirmaInfoForm from './components/FirmaInfoForm';
-import SectorSelection from './components/SectorSelection';
-import ServicesSelection from './components/ServicesSelection';
-import ComplianceDecision from './components/ComplianceDecision';
-import SecurityAssessment from './components/SecurityAssessment';
-import SummaryPage from './components/SummaryPage';
+import FirmaInfoForm from './components/Calculator/FirmaInfoForm';
+import SectorSelection from './components/Calculator/SectorSelection';
+import ServicesSelection from './components/Calculator/ServicesSelection';
+import ComplianceDecision from './components/Calculator/ComplianceDecision';
+import SecurityAssessment from './components/Calculator/SecurityAssessment';
+import SummaryPage from './components/Calculator/SummaryPage';
 import ImplementationModule from './components/ImplementationAgent/ImplementationModule';
 import MainLanding from './components/MainLanding';
 import { determineComplianceLevel } from './utils/complianceLogic';

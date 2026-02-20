@@ -1,0 +1,21 @@
+{
+  "files": {
+    "main.css": "/Semestralni_Prace_NIS2/static/css/main.1f5ecae4.css",
+    "main.js": "/Semestralni_Prace_NIS2/static/js/main.c3b07c49.js",
+    "static/js/239.1993e2e2.chunk.js": "/Semestralni_Prace_NIS2/static/js/239.1993e2e2.chunk.js",
+    "static/js/977.3b9f589d.chunk.js": "/Semestralni_Prace_NIS2/static/js/977.3b9f589d.chunk.js",
+    "static/js/455.096a5fa8.chunk.js": "/Semestralni_Prace_NIS2/static/js/455.096a5fa8.chunk.js",
+    "static/js/453.0bb56e4b.chunk.js": "/Semestralni_Prace_NIS2/static/js/453.0bb56e4b.chunk.js",
+    "index.html": "/Semestralni_Prace_NIS2/index.html",
+    "main.1f5ecae4.css.map": "/Semestralni_Prace_NIS2/static/css/main.1f5ecae4.css.map",
+    "main.c3b07c49.js.map": "/Semestralni_Prace_NIS2/static/js/main.c3b07c49.js.map",
+    "239.1993e2e2.chunk.js.map": "/Semestralni_Prace_NIS2/static/js/239.1993e2e2.chunk.js.map",
+    "977.3b9f589d.chunk.js.map": "/Semestralni_Prace_NIS2/static/js/977.3b9f589d.chunk.js.map",
+    "455.096a5fa8.chunk.js.map": "/Semestralni_Prace_NIS2/static/js/455.096a5fa8.chunk.js.map",
+    "453.0bb56e4b.chunk.js.map": "/Semestralni_Prace_NIS2/static/js/453.0bb56e4b.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.1f5ecae4.css",
+    "static/js/main.c3b07c49.js"
+  ]
+}

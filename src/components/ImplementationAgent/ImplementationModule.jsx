@@ -1,289 +1,213 @@
-import CryptoJS from 'crypto-js';
-import { generatePDFReport } from '../../utils/pdfExport';
-
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import IdentificationStep from './IdentificationStep';
+import AssetRegistryStep from './AssetRegistryStep';
+import AssetRulesStep from './AssetRulesStep';
 import ObligatedPersonStep from './ObligatedPersonStep';
 import SecurityMeasuresTable from './SecurityMeasuresTable';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import AuditReportDocument from './AuditReportDocument';
 import './ImplementationModule.css';
 
-// SVG Icons for Sidebar & Landing
-const Icons = {
-    Home: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>,
-    Identity: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>,
-    Shield: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>,
-    List: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>,
-    File: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>,
-    Exit: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>,
-    // New Icons for Landing (Bigger size handled by CSS wrapper, but same viewBox)
-    Bolt: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>,
-    FolderOpen: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-};
-
-export default function ImplementationModule(props) {
-    const [currentStep, setCurrentStep] = useState(0); // 0 = Internal Landing
+export default function ImplementationModule({ onExit }) {
+    const [currentStep, setCurrentStep] = useState(1);
+    const [showExpiryWarning, setShowExpiryWarning] = useState(false);
     const [moduleData, setModuleData] = useState({
-        legalContext: {},
-        riskData: { assets: [], smartLogic: {} },
-        finalMeasures: []
+        roles: {},
+        assets: [],
+        assetRules: {}, // § 4 Rules
+        signature: {},
+        measures: [],
+        revision: {},
+        revisionHistory: []
     });
 
-    const fileInputRef = useRef(null);
-
-    // --- Handlers ---
-    const handleNextStep = (dataKey, data) => {
-        setModuleData(prev => ({
-            ...prev,
-            [dataKey]: data.data || data
-        }));
-        if (currentStep < 4) setCurrentStep(prev => prev + 1);
+    const handleNext = (dataKey, data) => {
+        setModuleData(prev => ({ ...prev, [dataKey]: data }));
+        setCurrentStep(prev => prev + 1);
     };
 
-    const exportEncryptedJson = () => {
-        const password = prompt("Zadejte heslo pro zašifrování zálohy:\n(Toto heslo bude nutné pro budoucí obnovení)");
-        if (!password) return; // User cancelled
+    const handleMeasuresComplete = (data) => {
+        // data = { measures, revision }
+        // Generate Report ID
+        const reportId = crypto.randomUUID();
 
-        try {
-            const jsonStr = JSON.stringify(moduleData);
-            // Encrypt using AES
-            const encrypted = CryptoJS.AES.encrypt(jsonStr, password).toString();
+        // Append to history on finalize
+        setModuleData(prev => {
+            const newHistory = [
+                ...(prev.revisionHistory || []),
+                {
+                    date: data.revision.date,
+                    validUntil: data.revision.nextDate,
+                    manager: data.revision.manager,
+                    version: data.revision.version,
+                    reportId: reportId,
+                    timestamp: new Date().toISOString()
+                }
+            ];
 
-            // Add custom header to identify file type
-            const fileContent = "NIS2-AES-ENCRYPTED-V1:" + encrypted;
-
-            const blob = new Blob([fileContent], { type: "application/nis2-encrypted" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `nis2_backup_secure_${new Date().toISOString().slice(0, 10)}.nis2`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } catch (err) {
-            console.error(err);
-            alert("Chyba při šifrování zálohy.");
-        }
+            return {
+                ...prev,
+                measures: data.measures,
+                revision: data.revision,
+                signature: { ...prev.signature, reportId },
+                revisionHistory: newHistory
+            };
+        });
+        setCurrentStep(6);
     };
 
-    const importAuditFromJson = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
+    const handleDownload = () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(moduleData));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", `NIS2_Audit_${new Date().toISOString().split('T')[0]}.json`);
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    };
+
+    const handleUpload = (event) => {
+        const fileReader = new FileReader();
+        fileReader.readAsText(event.target.files[0], "UTF-8");
+        fileReader.onload = (e) => {
             try {
-                const content = e.target.result;
-                let parsedData;
+                const parsedData = JSON.parse(e.target.result);
+                setModuleData(parsedData);
 
-                // 1. Try Legacy JSON
-                if (content.trim().startsWith("{")) {
-                    parsedData = JSON.parse(content);
-                }
-                // 2. Try AES Encrypted
-                else if (content.startsWith("NIS2-AES-ENCRYPTED-V1:")) {
-                    const password = prompt("Zadejte heslo pro dešifrování zálohy:");
-                    if (!password) return;
-
-                    const encryptedData = content.replace("NIS2-AES-ENCRYPTED-V1:", "");
-                    const bytes = CryptoJS.AES.decrypt(encryptedData, password);
-                    const decryptedStr = bytes.toString(CryptoJS.enc.Utf8);
-
-                    if (!decryptedStr) throw new Error("Wrong password");
-
-                    parsedData = JSON.parse(decryptedStr);
-                }
-                // 3. Try Old Obfuscated (Backward Compatibility)
-                else {
-                    try {
-                        const decoded = atob(content);
-                        const salt = "NIS2-SECURE-BACKUP-V1-";
-                        if (decoded.startsWith(salt)) {
-                            const jsonStr = decodeURIComponent(decoded.slice(salt.length));
-                            parsedData = JSON.parse(jsonStr);
-                        } else {
-                            throw new Error("Invalid format");
-                        }
-                    } catch (err) {
-                        alert('Chyba: Neplatné heslo nebo poškozený soubor.');
-                        return;
+                // Expiry Check
+                if (parsedData.revision && parsedData.revision.nextDate) {
+                    const nextDate = new Date(parsedData.revision.nextDate);
+                    const today = new Date();
+                    if (today > nextDate) {
+                        setShowExpiryWarning(true);
+                    } else {
+                        setShowExpiryWarning(false);
                     }
                 }
 
-                if (parsedData && (parsedData.legalContext || parsedData.riskData)) {
-                    setModuleData(parsedData);
-                    setCurrentStep(1);
-                } else {
-                    alert('Chyba: Neznámý formát dat.');
-                }
-
+                alert("Data úspěšně načtena!");
             } catch (err) {
-                console.error(err);
-                alert('Chyba: Nepodařilo se načíst zálohu (špatné heslo?).');
+                alert("Chyba při načítání souboru.");
             }
         };
-        reader.readAsText(file);
-    };
-
-
-    // --- Content Rendering ---
-    const renderContent = () => {
-        switch (currentStep) {
-            case 0:
-                return (
-                    <div className="internal-landing fade-in">
-                        <h1 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '0.5rem' }}>Implementation Agent</h1>
-                        <p style={{ fontSize: '1.25rem', marginBottom: '3rem', maxWidth: '600px' }}>
-                            Vyhláška 410/2025 Sb.
-                        </p>
-
-                        <div className="landing-cards-row">
-                            <div
-                                className="action-card"
-                                onClick={() => setCurrentStep(1)}
-                            >
-                                <span className="icon"><Icons.Bolt /></span>
-                                <h3>Zahájit implementaci</h3>
-                                <p>Spustit nového průvodce identifikací aktiv a rizik.</p>
-                            </div>
-
-                            <div
-                                className="action-card"
-                                onClick={() => fileInputRef.current?.click()}
-                            >
-                                <span className="icon"><Icons.FolderOpen /></span>
-                                <h3>Načíst audit</h3>
-                                <p>Nahrát existující .json soubor a pokračovat v práci.</p>
-                                <input
-                                    type="file"
-                                    accept=".json"
-                                    ref={fileInputRef}
-                                    style={{ display: 'none' }}
-                                    onChange={importAuditFromJson}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                );
-            case 1:
-                return <IdentificationStep onComplete={(res) => handleNextStep('legalContext', res)} />;
-            case 2:
-                return <ObligatedPersonStep onComplete={(res) => handleNextStep('riskData', res)} />;
-            case 3:
-                return (
-                    <SecurityMeasuresTable
-                        smartLogic={moduleData.riskData?.smartLogic || {}}
-                        roles={['CISO', 'Admin', 'Management']}
-                        onComplete={(res) => handleNextStep('finalMeasures', res)}
-                    />
-                );
-            case 4:
-                return (
-                    <div className="glass-panel fade-in" style={{ textAlign: 'center', padding: '4rem' }}>
-                        <div style={{ fontSize: '4rem', marginBottom: '1rem', color: '#10b981' }}>✓</div>
-                        <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Implementace Dokončena</h2>
-                        <p style={{ marginBottom: '3rem', maxWidth: '600px', margin: '0 auto 3rem auto', color: 'rgba(235,235,245,0.6)' }}>
-                            Všechna data byla úspěšně zpracována. Nyní můžete vygenerovat oficiální report pro kontrolní orgány nebo si stáhnout zabezpečenou zálohu pro budoucí úpravy.
-                        </p>
-
-                        <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                            <div style={{ textAlign: 'left', maxWidth: '300px' }}>
-                                <button className="action-button primary large" style={{ width: '100%', marginBottom: '1rem' }} onClick={() => generatePDFReport(moduleData)}>
-                                    📄 Vygenerovat PDF Audit
-                                </button>
-                                <p style={{ fontSize: '0.85rem', color: 'rgba(235,235,245,0.4)', lineHeight: 1.4 }}>
-                                    Oficiální dokument obsahující identifikaci aktiv, analýzu rizik a navržená opatření. Vhodné pro tisk a audit.
-                                </p>
-                            </div>
-
-                            <div style={{ textAlign: 'left', maxWidth: '300px' }}>
-                                <button className="action-button large" style={{ width: '100%', marginBottom: '1rem', border: '1px solid rgba(255,255,255,0.1)' }} onClick={exportEncryptedJson}>
-                                    🔒 Stáhnout Šifrovanou Zálohu
-                                </button>
-                                <p style={{ fontSize: '0.85rem', color: 'rgba(235,235,245,0.4)', lineHeight: 1.4 }}>
-                                    Technický soubor (.nis2) pro budoucí obnovení práce v tomto portálu. Data jsou chráněna proti přímému čtení.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div style={{ marginTop: '4rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                            <button className="action-button" onClick={() => setCurrentStep(0)}>Zpět na hlavní menu</button>
-                        </div>
-                    </div>
-                );
-            default:
-                return <div>Neznámý krok</div>;
-        }
     };
 
     return (
         <div className="module-wrapper">
-            <aside className="sidebar">
-                <div className="sidebar-brand">
-                    <span className="brand-icon">🛡️</span> NIS2 AGENT
+            {showExpiryWarning && (
+                <div className="expiry-overlay">
+                    <div className="expiry-modal">
+                        <h1>⚠️ PLATNOST AUDITU VYPRŠELA!</h1>
+                        <p>Dle vyhlášky 410/2025 Sb. je nutné provést aktualizaci bezpečnostních opatření.</p>
+                        <p>Platnost předchozího auditu vypršela: <strong>{moduleData.revision?.nextDate}</strong></p>
+                        <button className="action-button primary" onClick={() => setShowExpiryWarning(false)}>
+                            Provést novou revizi
+                        </button>
+                    </div>
                 </div>
-                {(() => {
-                    const timestamp = moduleData.finalMeasures?.timestamp || moduleData.timestamp;
-                    if (timestamp) {
-                        const auditDate = new Date(timestamp);
-                        const today = new Date();
-                        const diffInDays = (today - auditDate) / (1000 * 60 * 60 * 24);
-                        if (diffInDays > 365) {
-                            return (
-                                <div style={{
-                                    background: '#1c1c1e',
-                                    border: '1px solid #bf5af2',
-                                    borderRadius: '12px',
-                                    padding: '12px',
-                                    margin: '0 1rem 1.5rem 1rem',
-                                    fontSize: '0.8rem',
-                                    color: '#bf5af2',
-                                    lineHeight: '1.4',
-                                    fontWeight: '500',
-                                    boxShadow: '0 0 10px rgba(191, 90, 242, 0.1)'
-                                }}>
-                                    ⚠️ Dokumentace expirovala. Proveďte povinnou roční aktualizaci dle § 3 písm. b.
-                                </div>
-                            );
-                        }
-                    }
-                    return null;
-                })()}
+            )}
+
+            <aside className="sidebar">
+                <div className="sidebar-brand">🛡️ NIS2 AGENT</div>
                 <nav className="stepper-nav">
-                    <div className={`step-item ${currentStep === 0 ? 'active' : ''}`} onClick={() => setCurrentStep(0)}>
-                        <div className="step-icon-wrap"><Icons.Home /></div> Start
-                    </div>
-                    <div className={`step-item ${currentStep === 1 ? 'active' : ''}`} onClick={() => setCurrentStep(1)}>
-                        <div className="step-icon-wrap"><Icons.Identity /></div> Identifikace
-                    </div>
-                    <div className={`step-item ${currentStep === 2 ? 'active' : ''}`} onClick={() => setCurrentStep(2)}>
-                        <div className="step-icon-wrap"><Icons.Shield /></div> Osoba & Podpis
-                    </div>
-                    <div className={`step-item ${currentStep === 3 ? 'active' : ''}`} onClick={() => setCurrentStep(3)}>
-                        <div className="step-icon-wrap"><Icons.List /></div> Opatření
-                    </div>
-                    <div className={`step-item ${currentStep === 4 ? 'active' : ''}`} onClick={() => setCurrentStep(4)}>
-                        <div className="step-icon-wrap"><Icons.File /></div> Report
-                    </div>
+                    <div className={`step-item ${currentStep === 1 ? 'active' : ''}`} onClick={() => setCurrentStep(1)}>1. Pojmy (§ 2)</div>
+                    <div className={`step-item ${currentStep === 2 ? 'active' : ''}`} onClick={() => setCurrentStep(2)}>2. Aktiva (§ 3)</div>
+                    <div className={`step-item ${currentStep === 3 ? 'active' : ''}`} onClick={() => setCurrentStep(3)}>3. Pravidla (§ 4)</div>
+                    <div className={`step-item ${currentStep === 4 ? 'active' : ''}`} onClick={() => setCurrentStep(4)}>4. Odpovědná osoba</div>
+                    <div className={`step-item ${currentStep === 5 ? 'active' : ''}`} onClick={() => setCurrentStep(5)}>5. Tabulka opatření</div>
+                    <div className={`step-item ${currentStep === 6 ? 'active' : ''}`} onClick={() => setCurrentStep(6)}>6. Hotovo</div>
                 </nav>
-                <div style={{ marginTop: 'auto', paddingTop: '2rem', borderTop: '1px solid var(--im-border)' }}>
-                    <div
-                        className="step-item"
-                        onClick={props.onExit}
-                        style={{ marginBottom: '1rem', color: '#ff453a' }}
-                    >
-                        <div className="step-icon-wrap" style={{ background: 'rgba(255, 69, 58, 0.1)', color: '#ff453a' }}>
-                            <Icons.Exit />
-                        </div>
-                        Ukončit
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: 'rgba(235, 235, 245, 0.3)' }}>
-                        Verze 2.2 (Final) <br />
-                        Vyhláška 410/2025 Sb.
+
+                <div className="sidebar-actions">
+                    <h4>SPRÁVA DAT (4 roky)</h4>
+                    <div className="sidebar-btn-stack">
+                        <button className="action-button secondary small" onClick={handleDownload} style={{ width: '100%' }}>
+                            💾 Uložit Projekt
+                        </button>
+                        <label className="action-button secondary small file-input-label">
+                            📂 Načíst Projekt
+                            <input type="file" onChange={handleUpload} style={{ display: 'none' }} accept=".json" />
+                        </label>
                     </div>
                 </div>
             </aside>
 
             <main className="main-content">
-                {renderContent()}
+                {currentStep === 1 && <IdentificationStep onComplete={(d) => handleNext('roles', d)} />}
+                {currentStep === 2 && <AssetRegistryStep onComplete={(d) => handleNext('assets', d)} />}
+                {currentStep === 3 && <AssetRulesStep assets={moduleData.assets} onComplete={(d) => handleNext('assetRules', d)} />}
+                {currentStep === 4 && <ObligatedPersonStep onComplete={(d) => handleNext('signature', d)} />}
+                {currentStep === 5 && (
+                    <SecurityMeasuresTable
+                        assetData={moduleData.assets}
+                        signatureData={moduleData.signature}
+                        revisionHistory={moduleData.revisionHistory}
+                        onComplete={handleMeasuresComplete}
+                    />
+                )}
+                {currentStep === 6 && (
+                    <div className="glass-panel">
+                        <h2>✓ Audit připraven k podpisu</h2>
+                        <p>Pro splnění zákonné povinnosti (§ 3 a § 4) musí být auditní zpráva prokazatelně schválena statutárním orgánem.</p>
+
+                        <div style={{ margin: '30px 0', textAlign: 'center' }}>
+                            <PDFDownloadLink
+                                document={<AuditReportDocument data={moduleData} />}
+                                fileName={`NIS2_Audit_Report_${moduleData.revision?.date}.pdf`}
+                                className="action-button primary"
+                                style={{ textDecoration: 'none', color: 'white', display: 'inline-block', padding: '15px 30px' }}
+                            >
+                                {({ blob, url, loading, error }) =>
+                                    loading ? 'Generuji PDF...' : '📄 Stáhnout PDF Report k podpisu'
+                                }
+                            </PDFDownloadLink>
+                            <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '10px' }}>
+                                ID Reportu: {moduleData.signature?.reportId}
+                            </p>
+                        </div>
+
+                        <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '20px', borderRadius: '12px', border: '1px solid #333' }}>
+                            <h3 style={{ fontSize: '1rem', marginBottom: '10px', color: '#ff9f0a' }}>Krok 2: Potvrzení a Archivace</h3>
+                            <label style={{ display: 'flex', alignItems: 'start', cursor: 'pointer', gap: '15px' }}>
+                                <input
+                                    type="checkbox"
+                                    style={{ transform: 'scale(1.5)', marginTop: '3px' }}
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setModuleData(prev => ({
+                                                ...prev,
+                                                signature: { ...prev.signature, signedDate: new Date().toISOString() }
+                                            }));
+                                        } else {
+                                            setModuleData(prev => ({
+                                                ...prev,
+                                                signature: { ...prev.signature, signedDate: null }
+                                            }));
+                                        }
+                                    }}
+                                />
+                                <span style={{ lineHeight: '1.4', fontSize: '0.9rem', color: '#ccc' }}>
+                                    Potvrzuji, že jsem vygenerovaný PDF report vytiskl(a) (nebo elektronicky podepsal(a)),
+                                    nechal(a) podepsat odpovědnou osobou a tento dokument jsem <strong>založil(a) do bezpečnostní dokumentace</strong> organizace.
+                                </span>
+                            </label>
+                        </div>
+
+                        {moduleData.signature?.signedDate && (
+                            <div style={{ marginTop: '30px', animation: 'fadeIn 0.5s', textAlign: 'center' }}>
+                                <div style={{ color: '#32d74b', marginBottom: '15px', fontWeight: 'bold' }}>
+                                    ✓ Audit byl úspěšně uzavřen dne {new Date(moduleData.signature.signedDate).toLocaleDateString()}
+                                </div>
+                                <div style={{ background: 'rgba(255, 159, 10, 0.15)', border: '1px solid #ff9f0a', padding: '15px', borderRadius: '8px', marginBottom: '20px', textAlign: 'left', fontSize: '0.9rem' }}>
+                                    <strong>⚠️ Nezapomeňte:</strong><br />
+                                    Stáhněte si také zdrojová data (JSON) tlačítkem v levém menu "Uložit Projekt".
+                                    Slouží pro budoucí aktualizace auditu, aniž byste museli vše vyplňovat znovu.
+                                </div>
+                                <button className="action-button primary" onClick={onExit} style={{ width: '100%' }}>Ukončit a vrátit se na úvod</button>
+                            </div>
+                        )}
+                    </div>
+                )}
             </main>
         </div>
     );

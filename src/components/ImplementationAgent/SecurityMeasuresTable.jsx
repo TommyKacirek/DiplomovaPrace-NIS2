@@ -1,333 +1,335 @@
 import React, { useState, useEffect } from 'react';
+import SecurityPolicyModal from './SecurityPolicyModal';
 
-/**
- * SecurityMeasuresTable
- * 
- * Step 5: Security Measures (Appendix 1 Decree 410/2025 Sb.)
- * 
- * Features:
- * - Master Table with Mandatory vs. Conditional logic.
- * - Strict State Machine: Validates Description/Responsibility.
- * - Dynamic Recommendations based on Smart Logic (Risk Context).
- */
-export default function SecurityMeasuresTable({ smartLogic, roles, onComplete }) {
+const COLUMN_INFO = {
+    measure: {
+        title: "Bezpečnostní opatření podle vyhlášky",
+        desc: "Příslušné bezpečnostní opatření požadované vyhláškou (Tab. č. 2).",
+        values: "Odkaz na konkrétní ustanovení právního předpisu (např. § 3)."
+    },
+    status: {
+        title: "Stav bezpečnostního opatření",
+        desc: "Popis stavu ve chvíli hodnocení účinnosti (Tab. č. 3).",
+        values: "• Zavedeno: Opatření je zavedeno v požadovaném rozsahu.\n• V procesu: Jsou činěny doložitelné kroky k zavedení.\n• Nezavedeno: Opatření zavedeno nebylo."
+    },
+    description: {
+        title: "Popis bezpečnostního opatření",
+        desc: "Stručný popis zavedení v návaznosti na stav (Tab. č. 4).",
+        values: "• Zavedeno: Odkaz na dokumentaci/směrnici.\n• V procesu: Popis prozatímního stavu.\n• Nezavedeno: Zdůvodnění, proč nebylo zavedeno."
+    },
+    deadline: {
+        title: "Termín zavedení bezpečnostního opatření",
+        desc: "Plánovaný termín zavedení v plném rozsahu (Tab. č. 5).",
+        values: "Vyplňuje se POUZE pokud stav není 'Zavedeno'. Konkrétní datum nebo kvartál."
+    },
+    priority: {
+        title: "Priorita zavedení bezpečnostního opatření",
+        desc: "Prioritizace s ohledem na dopad na regulovanou službu (Tab. č. 6).",
+        values: "1 (Nízká) - Žádný dopad absence.\n2 (Střední) - Minimální/krátkodobý dopad.\n3 (Vysoká) - Vážný/dlouhodobý dopad.\n4 (Kritická) - Okamžité/nevratné důsledky."
+    },
+    responsibility: {
+        title: "Odpovědnost za bezpečnostní opatření",
+        desc: "Osoba pověřená za zavedení daného opatření (Tab. č. 7).",
+        values: "Jméno osoby nebo konkrétní organizační složka."
+    }
+};
+
+export default function SecurityMeasuresTable({ assetData, signatureData, revisionHistory, onComplete }) {
     const [measures, setMeasures] = useState([]);
+    const [showPolicyModal, setShowPolicyModal] = useState(false);
+    const [revisionData, setRevisionData] = useState({
+        date: new Date().toISOString().split('T')[0],
+        nextDate: '',
+        manager: signatureData?.name || '',
+        version: '1.0'
+    });
 
-    // Flattened roles for dropdown
-    const availableRoles = [
-        ...(roles?.admins || []).map(r => ({ name: r, cat: 'Admin' })),
-        ...(roles?.privileged || []).map(r => ({ name: r, cat: 'Privileged' })),
-        ...(roles?.users || []).map(r => ({ name: r, cat: 'User' }))
-    ];
-
-    // --- 1. Ruleset Definition ---
-    // Mandatory: § 3(2-6), 4, 5, 6, 10
-    // Conditional: § 7, 8, 9, 11, 12, 13
-    const RULES = [
-        { id: '§ 3', title: 'Řízení aktiv a rizik', type: 'MANDATORY', desc: 'Identifikace a hodnocení aktiv.' },
-        { id: '§ 4', title: 'Bezpečnostní politika', type: 'MANDATORY', desc: 'Schválená dokumentace a pravidla.' },
-        { id: '§ 5', title: 'Organizační bezpečnost', type: 'MANDATORY', desc: 'Role, odpovědnosti, výbory.' },
-        { id: '§ 6', title: 'Zálohování a obnova', type: 'MANDATORY', desc: 'Pravidelné zálohy a testy obnovy.' },
-        { id: '§ 7', title: 'Bezpečnost lidských zdrojů', type: 'CONDITIONAL' },
-        { id: '§ 8', title: 'Řízení přístupu a identit (MFA)', type: 'CONDITIONAL' },
-        { id: '§ 9', title: 'Bezpečnost sítí a komunikace', type: 'CONDITIONAL' },
-        { id: '§ 10', title: 'Akvizice a vývoj (Bezpečný SW)', type: 'MANDATORY', desc: 'Bezpečnost při nákupu a vývoji.' },
-        { id: '§ 11', title: 'Fyzická a environmentální bezpečnost', type: 'CONDITIONAL' },
-        { id: '§ 12', title: 'Zvládání kybernetických incidentů', type: 'CONDITIONAL' },
-        { id: '§ 13', title: 'Kryptografické prostředky', type: 'CONDITIONAL' }
-    ];
-
-    // --- 2. Initialization Logic ---
     useEffect(() => {
-        const generatedMeasures = RULES.map(rule => {
-            let recommendation = '';
-            let isVisible = true;
+        if (signatureData?.name) {
+            setRevisionData(prev => ({ ...prev, manager: signatureData.name }));
+        }
+    }, [signatureData]);
 
-            // Smart Logic Evaluation
-            if (rule.type === 'CONDITIONAL') {
-                // § 8 (MFA) - Strongly recommended if Health/Safety impact OR High Value IT
-                if (rule.id === '§ 8') {
-                    if (smartLogic?.hasHealthOrSafetyImpact) recommendation = 'KRITICKÉ: Vyžadováno kvůli dopadům na zdraví/bezpečnost.';
-                    else if (smartLogic?.hasHighValueIT) recommendation = 'DOPORUČENO: Ochrana hodnotných aktiv.';
-                    else recommendation = 'Volitelné (dle analýzy rizik).';
-                }
+    useEffect(() => {
+        // Init next date on mount
+        const next = new Date();
+        next.setFullYear(next.getFullYear() + 1);
+        setRevisionData(prev => ({ ...prev, nextDate: next.toISOString().split('T')[0] }));
+    }, []);
 
-                // § 9 (Networks) - Critical for Legacy Systems
-                if (rule.id === '§ 9') {
-                    if (smartLogic?.hasLegacySystems) recommendation = 'KRITICKÉ: Segmentace sítě nutná pro izolaci zastaralých systémů.';
-                    else recommendation = 'Standardní síťová bezpečnost.';
-                }
+    const RULES = [
+        { id: '§ 3', title: 'Řízení aktiv, rizik a bezpečnostní politika', type: 'MANDATORY' },
+        { id: '§ 4', title: 'Povinnosti vrcholného vedení', type: 'MANDATORY' },
+        { id: '§ 5', title: 'Organizační bezpečnost', type: 'MANDATORY' },
+        { id: '§ 6', title: 'Zálohování a obnova', type: 'MANDATORY' },
+        { id: '§ 10', title: 'Řešení incidentů', type: 'MANDATORY' }
+    ];
 
-                // § 12 (Incident Management) - Scaled by IT Value
-                if (rule.id === '§ 12') {
-                    if (!smartLogic?.hasHighValueIT && !smartLogic?.hasHealthOrSafetyImpact) {
-                        recommendation = 'Lze aplikovat zjednodušený proces (princip přiměřenosti).';
-                    } else {
-                        recommendation = 'Vyžadován plný proces detekce a reakce.';
-                    }
-                }
+    useEffect(() => {
+        const initial = RULES.map(rule => ({
+            ...rule,
+            status: 'Nezavedeno',
+            description: '',
+            deadline: '',
+            priority: '2',
+            responsibility: signatureData?.name || ''
+        }));
+        setMeasures(initial);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [signatureData]);
 
-                // § 13 (Crypto) - Usually tied to Sensitive Data (implied) or high value
-                if (rule.id === '§ 13') {
-                    recommendation = 'Dle povahy zpracovávaných dat.';
-                }
-
-                // § 7 & 11 - General conditionals
-                if (rule.id === '§ 7' || rule.id === '§ 11') {
-                    recommendation = 'Dle kontextu organizace.';
-                }
-            } else {
-                recommendation = 'POVINNÉ: Zákonné minimum.';
-            }
-
-            return {
-                ...rule,
-                status: 'Nezavedeno',
-                description: '',
-                deadline: '',
-                priority: '2',
-                responsibility: '',
-                effectiveness: '', // PDCA: Check
-                lastReviewDate: '', // PDCA: Act/Review
-                recommendation
-            };
-        });
-
-        setMeasures(generatedMeasures);
-    }, [smartLogic]);
-
-    // --- 3. Handlers ---
-    const handleRowChange = (index, field, value) => {
+    const handleRowChange = (idx, field, val) => {
         const updated = [...measures];
-        updated[index][field] = value;
+        updated[idx][field] = val;
 
-        // Auto-clear deadline if "Zavedeno"
-        if (field === 'status' && value === 'Zavedeno') {
-            updated[index].deadline = '';
+        // Logic: Clear deadline if 'Zavedeno'
+        if (field === 'status' && val === 'Zavedeno') {
+            updated[idx].deadline = '';
         }
 
         setMeasures(updated);
     };
 
-    // --- 4. Validation Logic ---
-    const validateRow = (row) => {
-        // 1. Mandatory Text Fields
-        // Description is always required (how you do it OR why you don't)
-        const hasDesc = row.description && row.description.trim().length > 0;
-        const hasResp = row.responsibility && row.responsibility.trim().length > 0;
-
-        if (!hasDesc || !hasResp) return false;
-
-        // 2. PDCA: Check - Effectiveness is required if "Zavedeno"
-        if (row.status === 'Zavedeno') {
-            if (!row.effectiveness || row.effectiveness.trim().length === 0) return false;
-        }
-
-        return true;
-    };
-
-    // Check valid state for Submit trigger
-    const canSubmit = measures.every(m => {
-        if (!validateRow(m)) return false;
-
-        // Mandatory measures check
-        // We allow "Nezavedeno" but it will be flagged in the report.
-        // However, the prompt says "nedovolí stav 'Nezavedeno' bez kritického varování".
-        // The warning is visual in the UI. We won't hard block submission if they really want to generate a non-compliant report.
-        // But we ensure they filled out the justification (description).
-
-        return true;
+    const isTableValid = measures.every(m => {
+        // Validation logic
+        const descValid = m.description.trim().length > 3;
+        const respValid = m.responsibility.trim().length > 0;
+        const termValid = m.status === 'Zavedeno' || m.deadline.length > 0;
+        return descValid && respValid && termValid;
     });
 
-    const handleSubmit = () => {
-        if (onComplete) {
-            onComplete({
-                step: 5,
-                data: {
-                    securityMeasures: measures,
-                    timestamp: new Date().toISOString()
-                }
-            });
-        }
+    const renderHeaderWithTooltip = (label, infoKey) => (
+        <div className="header-cell-content">
+            {label}
+            <div className="header-info-icon">
+                ?
+                <div className="header-tooltip">
+                    <h4>{COLUMN_INFO[infoKey].title}</h4>
+                    <p><strong>Popis:</strong> {COLUMN_INFO[infoKey].desc}</p>
+                    <p className="tooltip-values"><strong>Hodnoty:</strong><br />{COLUMN_INFO[infoKey].values}</p>
+                </div>
+            </div>
+        </div>
+    );
+
+    const handleDateChange = (e) => {
+        const newDate = new Date(e.target.value);
+        const next = new Date(newDate);
+        next.setFullYear(next.getFullYear() + 1);
+        setRevisionData(prev => ({
+            ...prev,
+            date: e.target.value,
+            nextDate: next.toISOString().split('T')[0]
+        }));
     };
 
     return (
-        <div className="step-container fade-in security-measures-container">
+        <div className="step-container fade-in" style={{ maxWidth: '100%' }}>
             <div className="step-header">
-                <span className="step-badge">Krok 5</span>
-                <h2>Bezpečnostní opatření</h2>
-                <p className="step-legal-ref">Příloha č. 1 vyhlášky 410/2025 Sb.</p>
-                <p className="step-description">
-                    Definujte stav implementace pro povinná a doporučená opatření.
-                </p>
+                <h2>Tabulka č. 1: Přehled bezpečnostních opatření</h2>
+                <div className="step-legal-note">
+                    <strong>Příloha č. 1 vyhlášky 410/2025 Sb.</strong><br />
+                    Najeďte myší na otazník v záhlaví každého sloupce pro zobrazení oficiální nápovědy k vyplnění.
+                </div>
             </div>
 
-            <div className="measures-table-wrapper">
-                <table className="measures-table">
+            <div className="legal-table-wrapper" style={{ overflowX: 'auto', paddingBottom: '100px' }}> {/* Padding for tooltips */}
+                <table className="nis2-official-table">
                     <thead>
+                        {/* Decree Header Structure */}
                         <tr>
-                            <th style={{ width: '60px' }}>ID</th>
-                            <th style={{ width: '20%' }}>Opatření</th>
-                            <th style={{ width: '25%' }}>Doporučení / Kontext</th>
-                            <th style={{ width: '15%' }}>Stav</th>
-                            <th>Popis & Odpovědnost (Povinné)</th>
+                            <th colSpan="5" className="header-group">Vyhodnocení účinnosti zajišťování kybernetické bezpečnosti</th>
+                            <th className="header-empty-top"></th>
+                        </tr>
+                        <tr>
+                            <th style={{ width: '20%' }}>{renderHeaderWithTooltip('Bezpečnostní opatření podle vyhlášky', 'measure')}</th>
+                            <th style={{ width: '12%' }}>{renderHeaderWithTooltip('Stav bezpečnostního opatření', 'status')}</th>
+                            <th style={{ width: '25%' }}>{renderHeaderWithTooltip('Popis bezpečnostního opatření', 'description')}</th>
+                            <th style={{ width: '13%' }}>{renderHeaderWithTooltip('Termín zavedení bezpečnostního opatření', 'deadline')}</th>
+                            <th style={{ width: '12%' }}>{renderHeaderWithTooltip('Priorita zavedení bezpečnostního opatření', 'priority')}</th>
+                            <th style={{ width: '18%' }}>{renderHeaderWithTooltip('Odpovědnost za bezpečnostní opatření', 'responsibility')}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {measures.map((row, index) => {
-                            const isMandatory = row.type === 'MANDATORY';
-                            const isNezavedeno = row.status === 'Nezavedeno';
-                            const missingFields = !row.description || !row.responsibility;
-
-                            return (
-                                <tr
-                                    key={row.id}
-                                    className={`${missingFields ? 'row-invalid' : ''}`}
-                                    style={row.recommendation?.includes('KRITICKÉ') ? {
-                                        boxShadow: 'inset 0 0 15px rgba(191, 90, 242, 0.2)',
-                                        backgroundColor: 'rgba(191, 90, 242, 0.05)',
-                                        borderLeft: '4px solid #bf5af2'
-                                    } : {}}
-                                >
-                                    <td className="cell-id">
-                                        {row.id}
-                                        {isMandatory && <div style={{ color: '#ef4444', fontSize: '0.7rem' }}>(!)</div>}
-                                    </td>
-                                    <td className="cell-title">
-                                        <strong>{row.title}</strong>
-                                        {row.desc && <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.25rem' }}>{row.desc}</div>}
-                                    </td>
-                                    <td>
-                                        <div className="recommendation-badge" style={{
-                                            fontSize: '0.85rem',
-                                            padding: '0.5rem',
-                                            background: isMandatory ? '#fee2e2' : '#f1f5f9',
-                                            color: isMandatory ? '#991b1b' : '#475569',
-                                            borderRadius: '6px',
-                                            borderLeft: isMandatory ? '3px solid #ef4444' : '3px solid #cbd5e1'
-                                        }}>
-                                            {row.recommendation.includes('KRITICKÉ') ? (
-                                                <span>
-                                                    <strong style={{ color: '#bf5af2' }}>KRITICKÉ</strong>
-                                                    {row.recommendation.replace('KRITICKÉ', '')}
-                                                </span>
-                                            ) : (
-                                                row.recommendation
-                                            )}
-                                        </div>
-                                        {isMandatory && isNezavedeno && (
-                                            <div style={{ color: '#dc2626', fontSize: '0.8rem', fontWeight: 'bold', marginTop: '0.5rem' }}>
-                                                ⚠️ Musí být zavedeno!
-                                            </div>
-                                        )}
-                                    </td>
-                                    <td>
-                                        <select
-                                            className={`input-sleek small ${row.status === 'Zavedeno' ? 'status-done' : ''}`}
-                                            value={row.status}
-                                            onChange={(e) => handleRowChange(index, 'status', e.target.value)}
-                                        >
-                                            <option value="Nezavedeno">Nezavedeno</option>
-                                            <option value="V procesu">V procesu</option>
-                                            <option value="Zavedeno">Zavedeno</option>
-                                        </select>
-
-                                        {row.status !== 'Zavedeno' && (
-                                            <input
-                                                type="date"
-                                                className="input-sleek small"
-                                                style={{ marginTop: '0.5rem' }}
-                                                value={row.deadline}
-                                                onChange={(e) => handleRowChange(index, 'deadline', e.target.value)}
-                                            />
-                                        )}
-                                    </td>
-                                    <td>
-                                        <div className="combined-inputs">
-                                            {/* PLAN/DO: Description */}
-                                            <textarea
-                                                className={`input-sleek textarea-small ${!row.description ? 'input-error' : ''}`}
-                                                placeholder={isNezavedeno ? "Zdůvodnění nezavedení..." : "Popis způsobu realizace (Do)..."}
-                                                value={row.description}
-                                                onChange={(e) => handleRowChange(index, 'description', e.target.value)}
-                                                rows={2}
-                                            />
-
-                                            {/* CHECK: Effectiveness */}
-                                            {row.status === 'Zavedeno' && (
-                                                <textarea
-                                                    className={`input-sleek textarea-small ${!row.effectiveness ? 'input-error' : ''}`}
-                                                    placeholder="Vyhodnocení účinnosti (Check)..."
-                                                    value={row.effectiveness}
-                                                    onChange={(e) => handleRowChange(index, 'effectiveness', e.target.value)}
-                                                    rows={2}
-                                                    style={{ marginTop: '0.5rem', borderColor: '#a78bfa' }}
-                                                />
-                                            )}
-
-                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                                {/* PLAN: Responsibility */}
-                                                {availableRoles.length > 0 ? (
-                                                    <select
-                                                        className={`input-sleek small ${!row.responsibility ? 'input-error' : ''}`}
-                                                        value={row.responsibility}
-                                                        onChange={(e) => handleRowChange(index, 'responsibility', e.target.value)}
-                                                        style={{ flex: 1 }}
-                                                    >
-                                                        <option value="">-- Garant --</option>
-                                                        {availableRoles.map((role, i) => (
-                                                            <option key={i} value={role.name}>{role.name} ({role.cat})</option>
-                                                        ))}
-                                                    </select>
-                                                ) : (
-                                                    <input
-                                                        type="text"
-                                                        className={`input-sleek small ${!row.responsibility ? 'input-error' : ''}`}
-                                                        placeholder="Garant..."
-                                                        value={row.responsibility}
-                                                        onChange={(e) => handleRowChange(index, 'responsibility', e.target.value)}
-                                                        style={{ flex: 1 }}
-                                                    />
-                                                )}
-
-                                                {/* ACT: Review Date */}
-                                                <input
-                                                    type="date"
-                                                    className="input-sleek small"
-                                                    title="Datum poslední revize"
-                                                    value={row.lastReviewDate}
-                                                    onChange={(e) => handleRowChange(index, 'lastReviewDate', e.target.value)}
-                                                    style={{ width: '130px' }}
-                                                />
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            );
-                        })}
+                        {measures.map((row, idx) => (
+                            <tr key={row.id}>
+                                <td>
+                                    <div className="measure-id">{row.id}</div>
+                                    <div className="measure-title">{row.title}</div>
+                                </td>
+                                <td>
+                                    <select
+                                        value={row.status}
+                                        onChange={e => handleRowChange(idx, 'status', e.target.value)}
+                                        className={`input-sleek small status-${row.status === 'Zavedeno' ? 'ok' : 'pending'}`}
+                                    >
+                                        <option value="Nezavedeno">Nezavedeno</option>
+                                        <option value="V procesu">V procesu</option>
+                                        <option value="Zavedeno">Zavedeno</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <textarea
+                                        placeholder={row.status === 'Zavedeno' ? "Odkaz na směrnici..." : "Zdůvodnění..."}
+                                        value={row.description}
+                                        onChange={e => handleRowChange(idx, 'description', e.target.value)}
+                                        className="input-sleek"
+                                        rows={2}
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="date"
+                                        value={row.deadline}
+                                        disabled={row.status === 'Zavedeno'}
+                                        onChange={e => handleRowChange(idx, 'deadline', e.target.value)}
+                                        className="input-sleek"
+                                        style={{ opacity: row.status === 'Zavedeno' ? 0.3 : 1 }}
+                                    />
+                                </td>
+                                <td>
+                                    <select value={row.priority} onChange={e => handleRowChange(idx, 'priority', e.target.value)} className="input-sleek">
+                                        <option value="1">1 - Nízká</option>
+                                        <option value="2">2 - Střední</option>
+                                        <option value="3">3 - Vysoká</option>
+                                        <option value="4">4 - Kritická</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input
+                                        type="text"
+                                        value={row.responsibility}
+                                        onChange={e => handleRowChange(idx, 'responsibility', e.target.value)}
+                                        className="input-sleek"
+                                    />
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>
 
-            <div className="form-actions-bar">
-                <div className="validation-status">
-                    {!canSubmit && (
-                        <span className="status-invalid">
-                            Vyplňte prosím popis a odpovědnou osobu u všech opatření.
-                        </span>
-                    )}
-                    {canSubmit && (
-                        <span className="status-valid">✓ Všechna data jsou kompletní</span>
-                    )}
+            {/* § 3 Security Policy Management Section (Dedicated) */}
+            <div className="policy-management-section">
+                <h3>§ 3 Řízení bezpečnostní politiky a dokumentace</h3>
+                <p className="section-desc">
+                    (3) Povinná osoba v rámci řízení bezpečnostní politiky a bezpečnostní dokumentace:
+                </p>
+
+                <div className="policy-grid">
+                    {/* Point a) */}
+                    <div className="policy-card">
+                        <strong style={{ color: '#4caf50' }}>a) Stanovení</strong>
+                        <p>
+                            Stanoví bezpečnostní politiku a dokumentaci k opatřením.
+                        </p>
+                        <button
+                            className="action-button secondary small"
+                            onClick={() => setShowPolicyModal(true)}
+                        >
+                            📄 Generovat Politiku
+                        </button>
+                    </div>
+
+                    {/* Point b) */}
+                    <div className="policy-card">
+                        <strong style={{ color: '#2196f3' }}>b) Aktualizace</strong>
+                        <p>
+                            Pravidelně přezkoumává a aktualizuje pravidla (min. 1x ročně).
+                        </p>
+                        <div style={{ fontSize: '0.8rem', color: '#888', textAlign: 'center', marginTop: 'auto' }}>
+                            ⬇ Viz <em>Správa revize</em> níže
+                        </div>
+                    </div>
+
+                    {/* Point c) */}
+                    <div className="policy-card">
+                        <strong style={{ color: '#ff9800' }}>c) Vynucování</strong>
+                        <p>
+                            Vynucuje dodržování pravidel a postupů (seznámení).
+                        </p>
+                        <button
+                            className="action-button secondary small"
+                            onClick={() => setShowPolicyModal(true)}
+                        >
+                            ✍️ Podpisový arch
+                        </button>
+                    </div>
                 </div>
-                <button
-                    className="action-button primary"
-                    onClick={handleSubmit}
-                    disabled={!canSubmit}
-                >
-                    Schválit a vygenerovat audit
+            </div>
+
+            <div className="document-management-footer">
+                <h3>Správa a revize dokumentu</h3>
+                <div className="doc-meta-grid">
+                    <div className="meta-item">
+                        <label>Datum revize</label>
+                        <input type="date" value={revisionData.date} onChange={handleDateChange} className="input-sleek" />
+                    </div>
+                    <div className="meta-item">
+                        <label>Platnost do (Příští revize)</label>
+                        <input type="date" value={revisionData.nextDate} readOnly className="input-sleek" style={{ color: '#ff9f0a', fontWeight: 'bold' }} />
+                        <small style={{ color: '#888' }}>*Povinná aktualizace min. 1x ročně</small>
+                    </div>
+                    <div className="meta-item">
+                        <label>Schválil (Garant)</label>
+                        <input type="text" value={revisionData.manager} onChange={e => setRevisionData({ ...revisionData, manager: e.target.value })} className="input-sleek" />
+                    </div>
+                    <div className="meta-item">
+                        <label>Verze</label>
+                        <input type="text" value={revisionData.version} onChange={e => setRevisionData({ ...revisionData, version: e.target.value })} className="input-sleek" style={{ width: '80px' }} />
+                    </div>
+                </div>
+            </div>
+
+            <div className="form-actions-bar">
+                <div className="validation-message">
+                    {!isTableValid && "Vyplňte prosím všechna povinná pole (popis, odpovědnost, termín pro nezavedené)."}
+                </div>
+                <button className="action-button primary" disabled={!isTableValid} onClick={() => onComplete({ measures, revision: revisionData })}>
+                    Finalizovat Audit
                 </button>
             </div>
-        </div>
+
+            {/* Revision History Table (4-Year Archiving) */}
+            {revisionHistory && revisionHistory.length > 0 && (
+                <div className="history-section" style={{ marginTop: '30px', borderTop: '1px solid var(--im-border)', paddingTop: '20px' }}>
+                    <h3 style={{ color: '#888', fontSize: '1rem', marginBottom: '15px' }}>📜 Historie revizí (Archiv)</h3>
+                    <table className="nis2-official-table" style={{ fontSize: '0.85rem', opacity: 0.8 }}>
+                        <thead>
+                            <tr>
+                                <th>Datum revize</th>
+                                <th>Verze</th>
+                                <th>Garant</th>
+                                <th>Platnost do</th>
+                                <th>Stav</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {revisionHistory.map((rev, i) => (
+                                <tr key={i}>
+                                    <td>{rev.date}</td>
+                                    <td>{rev.version}</td>
+                                    <td>{rev.manager}</td>
+                                    <td>{rev.validUntil}</td>
+                                    <td><span className="status-badge" style={{ background: '#333', color: '#ccc', padding: '2px 6px', borderRadius: '4px' }}>Archivováno</span></td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {/* Security Policy Modal */}
+            {
+                showPolicyModal && (
+                    <SecurityPolicyModal
+                        companyName={assetData && assetData.length > 0 ? "Vaše Společnost" : "Nezadáno"} // TODO: Pass company name properly if available
+                        assets={assetData}
+                        manager={signatureData?.name}
+                        onClose={() => setShowPolicyModal(false)}
+                    />
+                )
+            }
+        </div >
     );
 }
