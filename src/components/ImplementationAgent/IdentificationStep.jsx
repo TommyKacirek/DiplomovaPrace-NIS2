@@ -9,9 +9,9 @@ import './IdentificationStep.css';
  * Formal confirmation of definitions and CIA triad.
  * Users must assign roles and sign off on understanding security principles.
  */
-export default function IdentificationStep({ onComplete }) {
+export default function IdentificationStep({ onComplete, data }) {
   // State for § 2 Definitions (a, b, c, d)
-  const [definitions, setDefinitions] = useState({
+  const [definitions, setDefinitions] = useState(data?.definitions || {
     user: {
       id: 'a',
       label: 'Uživatel',
@@ -47,7 +47,7 @@ export default function IdentificationStep({ onComplete }) {
   });
 
   // State for CIA Triad Confirmation
-  const [ciaSignature, setCiaSignature] = useState('');
+  const [ciaSignature, setCiaSignature] = useState(data?.ciaTriad?.signature || '');
 
   // --- Handlers ---
   const handleDefChange = (key, field, value) => {
@@ -68,7 +68,7 @@ export default function IdentificationStep({ onComplete }) {
   };
 
   const handleSubmit = () => {
-    if (isStepValid() && onComplete) {
+    if (onComplete) {
       onComplete({
         step: 1,
         data: {
@@ -172,7 +172,6 @@ export default function IdentificationStep({ onComplete }) {
         <button
           className="action-button primary"
           onClick={handleSubmit}
-          disabled={!isStepValid()}
         >
           Potvrdit a pokračovat
         </button>

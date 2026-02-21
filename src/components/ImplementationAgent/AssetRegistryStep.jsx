@@ -18,8 +18,8 @@ const ASSET_INFO = {
     }
 };
 
-export default function AssetRegistryStep({ onComplete }) {
-    const [assets, setAssets] = useState([]);
+export default function AssetRegistryStep({ onComplete, data }) {
+    const [assets, setAssets] = useState(data || []);
     const [newAsset, setNewAsset] = useState({ name: '', type: 'Primární', c: '1', i: '1', a: '1' });
 
     const addAsset = () => {
@@ -28,7 +28,6 @@ export default function AssetRegistryStep({ onComplete }) {
         setNewAsset({ name: '', type: 'Primární', c: '1', i: '1', a: '1' });
     };
 
-    const isStepValid = assets.length > 0;
 
     const renderHeaderWithTooltip = (label, infoKey) => (
         <div className="header-cell-content">
@@ -132,7 +131,7 @@ export default function AssetRegistryStep({ onComplete }) {
             </table>
 
             <div className="form-actions-bar">
-                <button className="action-button primary" disabled={!isStepValid} onClick={() => onComplete({ assets })}>Uložit a pokračovat</button>
+                <button className="action-button primary" onClick={() => onComplete({ assets })}>Uložit a pokračovat</button>
             </div>
         </div>
     );

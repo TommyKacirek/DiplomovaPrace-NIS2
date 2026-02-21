@@ -17,152 +17,7 @@ const colors = {
   border: '#E5E5EA',
   black: '#000000'
 };
-const SERVICES_DATA_DB = {
-  "Veřejná správa": [{ id: '1.1', label: 'Výkon svěřených pravomocí' }],
-  "Energetika – Elektřina": [
-    { id: '2.1', label: 'Výroba elektřiny' },
-    { id: '2.2', label: 'Provoz přenosové soustavy elektřiny' },
-    { id: '2.3', label: 'Provoz distribuční soustavy elektřiny' },
-    { id: '2.4', label: 'Obchod s elektřinou' },
-    { id: '2.5', label: 'Činnost nominovaného organizátora trhu' },
-    { id: '2.6', label: 'Agregace elektřiny' },
-    { id: '2.7', label: 'Ukládání elektřiny' },
-    { id: '2.8', label: 'Odezva strany poptávky' },
-    { id: '2.9', label: 'Provoz veřejně přístupné dobíjecí stanice' },
-    { id: '2.10', label: 'Činnost Elektroenergetického datového centra' }
-  ],
-  "Energetika – Ropa a ropné produkty": [
-    { id: '3.1', label: 'Těžba ropy' },
-    { id: '3.2', label: 'Zpracovávání ropy' },
-    { id: '3.3', label: 'Provoz skladovacího zařízení pro skladování ropy' },
-    { id: '3.4', label: 'Provoz ropovodu' },
-    { id: '3.5', label: 'Provoz produktovodu' },
-    { id: '3.6', label: 'Činnost ústředního správce zásob' },
-    { id: '3.7', label: 'Provoz veřejně přístupné čerpací stanice' }
-  ],
-  "Energetika – Zemní plyn": [
-    { id: '4.1', label: 'Výroba zemního plynu' },
-    { id: '4.2', label: 'Provoz přepravní soustavy zemního plynu' },
-    { id: '4.3', label: 'Provoz distribuční soustavy zemního plynu' },
-    { id: '4.4', label: 'Obchod se zemním plynem' },
-    { id: '4.5', label: 'Uskladňování zemního plynu' }
-  ],
-  "Energetika – Teplárenství": [
-    { id: '5.1', label: 'Výroba tepelné energie' },
-    { id: '5.2', label: 'Provoz soustavy zásobování tepelnou energií' }
-  ],
-  "Energetika – Vodík": [
-    { id: '6.1', label: 'Výroba vodíku' },
-    { id: '6.2', label: 'Skladování vodíku' },
-    { id: '6.3', label: 'Přeprava vodíku' }
-  ],
-  "Výrobní průmysl": [
-    { id: '7.1', label: 'Výroba počítačů, elektronických a optických přístrojů' },
-    { id: '7.2', label: 'Výroba elektrických zařízení' },
-    { id: '7.3', label: 'Výroba strojů a zařízení' },
-    { id: '7.4', label: 'Výroba motorových vozidel, přívěsů a návěsů' },
-    { id: '7.5', label: 'Výroba ostatních dopravních prostředků' }
-  ],
-  "Potravinářský průmysl": [
-    { id: '8.1', label: 'Průmyslová výroba potravin' },
-    { id: '8.2', label: 'Průmyslové zpracování potravin' },
-    { id: '8.3', label: 'Velkoobchodní distribuce potravin' }
-  ],
-  "Chemický průmysl": [
-    { id: '9.1', label: 'Výroba chemických látek podléhajících registraci' },
-    { id: '9.2', label: 'Uvádění chemických látek na trh' },
-    { id: '9.3', label: 'Výroba předmětů podléhajících registraci' },
-    { id: '9.4', label: 'Užívání objektu za účelem umístění nebezpečné látky' }
-  ],
-  "Vodní hospodářství": [
-    { id: '10.1', label: 'Provozování vodovodu sloužícího veřejné potřebě' },
-    { id: '10.2', label: 'Provozování kanalizace sloužící veřejné potřebě' }
-  ],
-  "Odpadové hospodářství": [
-    { id: '11.1', label: 'Provoz zařízení určeného pro nakládání s odpady' },
-    { id: '11.2', label: 'Obchodování s odpadem' },
-    { id: '11.3', label: 'Zprostředkování nakládání s odpadem' },
-    { id: '11.4', label: 'Přeprava odpadu' }
-  ],
-  "Letecká doprava": [
-    { id: '12.1', label: 'Provoz obchodní letecké dopravy' },
-    { id: '12.2', label: 'Provoz mezinárodního letiště' },
-    { id: '12.3', label: 'Provoz pomocných zařízení letiště' },
-    { id: '12.4', label: 'Letové navigační služby' }
-  ],
-  "Drážní doprava": [
-    { id: '13.1', label: 'Provozování železniční dopravní cesty' },
-    { id: '13.2', label: 'Provoz celostátní dráhy' },
-    { id: '13.3', label: 'Provoz regionální dráhy' },
-    { id: '13.4', label: 'Provoz veřejně přístupné vlečky' },
-    { id: '13.5', label: 'Provoz drážní dopravy na celostátní dráze' },
-    { id: '13.6', label: 'Provoz drážní dopravy na regionální dráze' },
-    { id: '13.7', label: 'Provoz drážní dopravy na veřejně přístupné vlečce' },
-    { id: '13.8', label: 'Provoz zařízení služeb' }
-  ],
-  "Námořní vodní doprava": [
-    { id: '14.1', label: 'Činnost námořní vodní dopravy' },
-    { id: '14.2', label: 'Provoz řídícího orgánu přístavu' },
-    { id: '14.3', label: 'Provoz vodního díla nebo zařízení v přístavu' },
-    { id: '14.4', label: 'Provoz služby lodní dopravě' }
-  ],
-  "Silniční doprava": [
-    { id: '15.1', label: 'Řízení provozu na pozemních komunikacích' },
-    { id: '15.2', label: 'Provoz inteligentního dopravního systému' }
-  ],
-  "Digitální infrastruktura a služby": [
-    { id: '16.1', label: 'Poskytování veřejně dostupné služby elektronických komunikací' },
-    { id: '16.2', label: 'Zajišťování veřejné komunikační sítě' },
-    { id: '16.3', label: 'Poskytování služby výměnného uzlu internetu (IXP)' },
-    { id: '16.4', label: 'Poskytování služby systému překladu doménových jmen (DNS)' },
-    { id: '16.5', label: 'Poskytování služby registrace a správy doménových jmen' },
-    { id: '16.6', label: 'Správa a provoz registru domény nejvyšší úrovně' },
-    { id: '16.7', label: 'Správa a provoz domény gov.cz' },
-    { id: '16.8', label: 'Poskytování služby cloud computingu' },
-    { id: '16.9', label: 'Poskytování služby datového centra' },
-    { id: '16.10', label: 'Poskytování služby sítě pro doručování obsahu (CDN)' },
-    { id: '16.11', label: 'Správa kvalifikovaného systému elektronické identifikace' },
-    { id: '16.12', label: 'Poskytování služby vytvářející důvěru' },
-    { id: '16.13', label: 'Poskytování řízené služby (MSP)' },
-    { id: '16.14', label: 'Poskytování řízené bezpečnostní služby (MSSP)' },
-    { id: '16.15', label: 'Poskytování služby on-line tržiště' },
-    { id: '16.16', label: 'Poskytování služby internetového vyhledávače' },
-    { id: '16.17', label: 'Poskytování platformy sociální sítě' },
-    { id: '16.18', label: 'Provozování Národního CERT' }
-  ],
-  "Finanční trh": [
-    { id: '17.1', label: 'Činnost úvěrové instituce' },
-    { id: '17.2', label: 'Provoz obchodního systému' },
-    { id: '17.3', label: 'Činnost ústřední protistrany' },
-    { id: '17.4', label: 'Činnost platební instituce' },
-    { id: '17.5', label: 'Činnost instituce elektronických peněz' }
-  ],
-  "Zdravotnictví": [
-    { id: '18.1', label: 'Poskytování zdravotní péče' },
-    { id: '18.2', label: 'Poskytování zdravotnické záchranné služby' },
-    { id: '18.3', label: 'Činnost referenční laboratoře EU' },
-    { id: '18.4', label: 'Výzkum a vývoj humánních léčivých přípravků' },
-    { id: '18.5', label: 'Výroba humánních léčivých přípravků' },
-    { id: '18.6', label: 'Výroba léčivých látek' },
-    { id: '18.7', label: 'Výroba zdravotnických prostředků' },
-    { id: '18.8', label: 'Výroba diagnostických zdravotnických prostředků in vitro' },
-    { id: '18.9', label: 'Výroba kriticky důležitých zdravotnických prostředků' }
-  ],
-  "Věda, výzkum a vzdělávání": [
-    { id: '19.1', label: 'Výzkum a vývoj' }
-  ],
-  "Poštovní a kurýrní služby": [
-    { id: '20.1', label: 'Poštovní služba' },
-    { id: '20.2', label: 'Kurýrní služba' }
-  ],
-  "Obranný průmysl": [
-    { id: '21.1', label: 'Výroba vojenského materiálu' },
-    { id: '21.2', label: 'Obchod s vojenským materiálem' }
-  ],
-  "Vesmírný průmysl": [
-    { id: '22.1', label: 'Zajištění podpory poskytování služeb využívajících kosmického prostoru' }
-  ]
-};
+
 
 // ==========================================
 // 2. DATA: OPATŘENÍ (Režim 410/2025: §3 - §14)
@@ -372,7 +227,7 @@ const ProgressBar = ({ percent }) => (
 // ==========================================
 
 const ReportDocument = ({ data }) => {
-  const { companySize, sector, selectedServices, specialCriteria, complianceLevel, complianceReasoning, securityStatus } = data;
+  const { companySize, sector, complianceLevel, complianceReasoning, securityStatus } = data;
   const today = new Date().toLocaleDateString('cs-CZ');
 
   // A. Logika
@@ -403,8 +258,8 @@ const ReportDocument = ({ data }) => {
     : 0;
 
   // D. Služby
-  const sectorServices = SERVICES_DATA_DB[sector] || [];
-  const selectedServicesDetails = sectorServices.filter(s => selectedServices.includes(s.id));
+  // const sectorServices = SERVICES_DATA_DB[sector] || [];
+  // const selectedServicesDetails = sectorServices.filter(s => selectedServices.includes(s.id));
 
   // E. Barvy badge
   let badgeBg = colors.success;
@@ -648,7 +503,6 @@ const AgentReportDocument = ({ data }) => {
   // Data hash calculation (Simulating integrity check of the export)
   const dataString = JSON.stringify({ legalContext, riskData, finalMeasures });
   const hash = CryptoJS.SHA256(dataString).toString(CryptoJS.enc.Hex).toUpperCase();
-  const shortHash = `${hash.substring(0, 8)}-${hash.substring(8, 12)}-${hash.substring(12, 16)}...`;
 
   return (
     <Document>

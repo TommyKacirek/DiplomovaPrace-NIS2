@@ -37,7 +37,7 @@ export default function MainLanding({ onSelectMode }) {
           </div>
         </div>
 
-        {/* Card 2: Agent */}
+        {/* Card 2: Agent (V1) */}
         <div
           className="bento-card"
           onClick={() => onSelectMode('implementation')}
@@ -49,12 +49,30 @@ export default function MainLanding({ onSelectMode }) {
             <div className="card-arrow">↗</div>
           </div>
           <div className="card-content-wrap">
-            <h3>Implementační Agent</h3>
-            <p>Interaktivní průvodce vyhláškou 410/2025 Sb.</p>
+            <h3>Nástroj V1</h3>
+            <p>Interaktivní průvodce (Původní verze).</p>
           </div>
         </div>
 
-        {/* Card 3: Info (Full Width) */}
+        {/* Card 3: Agent (V2 - The Profiler) */}
+        <div
+          className="bento-card"
+          onClick={() => onSelectMode('implementation-v2')}
+          role="button"
+          tabIndex={0}
+          style={{ borderColor: 'rgba(50, 215, 75, 0.3)' }}
+        >
+          <div className="card-top">
+            <div className="card-badge" style={{ background: 'rgba(50, 215, 75, 0.15)', color: '#32d74b' }}>⚖️</div>
+            <div className="card-arrow">↗</div>
+          </div>
+          <div className="card-content-wrap">
+            <h3>Agent v2 (The Profiler)</h3>
+            <p>Nová generace s kalkulací právního štítu a přiměřenosti.</p>
+          </div>
+        </div>
+
+        {/* Card 4: Info (Full Width) */}
         <div className="bento-card wide">
           <div className="card-content-horizontal">
             <div className="card-badge gray">🔒</div>

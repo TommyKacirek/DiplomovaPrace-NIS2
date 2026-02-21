@@ -54,4 +54,7 @@ Aplikace se spustí na adrese `http://localhost:3000` (nebo jiném portu, který
   - `public/` – statické soubory
 - `package.json` – konfigurace projektu a seznam závislostí
 - `package-lock.json` – uzamčené verze balíčků
-- `.gitignore` – soubory a složky ignorované verzovacím systémem (např. `node_modules/`)
+- `.gitignore` – soubory a složky ignorované verzovacím systémem
+- `ARCHITECTURE.md` – [NOVÉ] High-level popis architektury a datového toku The Profiler V2 aplikací.
+- `TECHNICAL_GUIDE.md` – [NOVÉ] Technický průvodce hodnotícím logickým jádrem a principem konverze do PDF Reportu.
+- `COMPLIANCE_ANALYSIS_V2.md` – [NOVÉ] Komplexní analytická obhajoba modulu V2 pro auditory a NÚKIB compliance.

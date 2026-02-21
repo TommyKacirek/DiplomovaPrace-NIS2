@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import './IdentificationStep.css'; // Reuse basic layout, but override with inline styles for "Black Apple"
 
-export default function ObligatedPersonStep({ onComplete }) {
-    const [name, setName] = useState('');
-    const [role, setRole] = useState('');
+export default function ObligatedPersonStep({ onComplete, data }) {
+    const [name, setName] = useState(data?.name || '');
+    const [role, setRole] = useState(data?.role || '');
 
     // Compliance Checkboxes
-    const [checks, setChecks] = useState({
+    const [checks, setChecks] = useState(data?.declarations || {
         s3: false, // § 3 Minimum Security
         s4: false, // § 4 Governance
         s5: false, // § 5 HR
@@ -18,11 +18,8 @@ export default function ObligatedPersonStep({ onComplete }) {
         setChecks(prev => ({ ...prev, [key]: !prev[key] }));
     };
 
-    const allChecked = Object.values(checks).every(Boolean);
 
     const handleSave = () => {
-        if (!name || !role || !allChecked) return;
-
         // Save data for report generation
         if (onComplete) {
             onComplete({
@@ -202,18 +199,17 @@ export default function ObligatedPersonStep({ onComplete }) {
                     <div style={{ textAlign: 'center' }}>
                         <button
                             onClick={handleSave}
-                            disabled={!name || !role || !allChecked}
                             style={{
-                                background: (!name || !role || !allChecked) ? '#222' : '#0071e3', // Blue for "Next Step"
-                                color: (!name || !role || !allChecked) ? '#555' : '#fff',
+                                background: '#0071e3', // Blue for "Next Step"
+                                color: '#fff',
                                 border: 'none',
                                 padding: '1.2rem 3rem',
                                 borderRadius: '50px',
                                 fontSize: '1.1rem',
                                 fontWeight: 600,
-                                cursor: (!name || !role || !allChecked) ? 'not-allowed' : 'pointer',
+                                cursor: 'pointer',
                                 transition: 'all 0.3s',
-                                boxShadow: (!name || !role || !allChecked) ? 'none' : '0 4px 20px rgba(0, 113, 227, 0.3)'
+                                boxShadow: '0 4px 20px rgba(0, 113, 227, 0.3)'
                             }}
                         >
                             Uložit a Pokračovat (Generovat Report)

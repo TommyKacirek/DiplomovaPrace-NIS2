@@ -6,6 +6,7 @@ import ComplianceDecision from './components/Calculator/ComplianceDecision';
 import SecurityAssessment from './components/Calculator/SecurityAssessment';
 import SummaryPage from './components/Calculator/SummaryPage';
 import ImplementationModule from './components/ImplementationAgent/ImplementationModule';
+import ImplementationModuleV2 from './components/ImplementationAgent/ImplementationModuleV2';
 import MainLanding from './components/MainLanding';
 import { determineComplianceLevel } from './utils/complianceLogic';
 import './App.css';
@@ -18,7 +19,6 @@ function App() {
   const [complianceResult, setComplianceResult] = useState(null);
   const [securityStatus, setSecurityStatus] = useState({});
   const [step, setStep] = useState(1);
-  const [agentData, setAgentData] = useState({});
 
   const PROGRESS = {
     1: 0, 2: 20, 3: 40, 4: 60, 5: 80, 6: 100
@@ -62,11 +62,6 @@ function App() {
     setCompanySize(null); setSector(''); setServicesData(null); setComplianceResult(null); setSecurityStatus({}); setStep(1);
   };
 
-  // --- Handlers (Agent) ---
-  const handleAgentComplete = (result) => {
-    setAgentData(prev => ({ ...prev, ...result.data }));
-    alert("Data uložena.");
-  };
 
   // --- Render Helpers ---
   const showGlobalHeader = appMode === 'calculator'; // Only show generic header in calculator mode
@@ -128,11 +123,18 @@ function App() {
         </div>
       )}
 
-      {/* IMPLEMENTATION (Full Screen) */}
+      {/* IMPLEMENTATION V1 (Full Screen) */}
       {showImplementation && (
         <div className="agent-fullscreen-wrapper fade-in">
           {/* Note: Pass a prop to allow returning to landing if needed, though sidebar handles navigation primarily */}
           <ImplementationModule onExit={() => setAppMode('landing')} />
+        </div>
+      )}
+
+      {/* IMPLEMENTATION V2 (The Profiler) (Full Screen) */}
+      {appMode === 'implementation-v2' && (
+        <div className="agent-fullscreen-wrapper fade-in">
+          <ImplementationModuleV2 onExit={() => setAppMode('landing')} />
         </div>
       )}
 
